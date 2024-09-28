@@ -1,0 +1,11 @@
+#!/bin/sh
+# Since we're running on a mobile device without working VT the best we can really
+# do is save some logs to rootfs for further analysis from recovery mode
+set -x
+exec > /dinit-panic.log 2>&1
+
+dmesg
+
+# FIXME: only seems to reboot normally..
+#modprobe reboot_mode
+reboot-mode recovery

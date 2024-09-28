@@ -1,0 +1,12 @@
+# https://apps.kde.org/kate temporary files
+.*.kate-swp
+
+# mkrootfs.sh artifacts
+/apk-cache
+/chimera-linux-*-ROOTFS-*-bootstrap.tar.gz
+
+# cbuild/cports artifacts
+/overlays/**/pkgs/*.apk
+
+# ~100M of kernel module binaries extracted from UT boot tarball
+/overlays/volla-vidofnir/usr/lib/modules

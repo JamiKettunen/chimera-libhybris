@@ -1,0 +1,33 @@
+#!/bin/sh
+# TODO: make into dinit service depending on android.target
+echo 'waiting for android container to start...'
+while [ ! -f /run/lxc/lock/var/lib/lxc/.android ]; do sleep 1; done
+echo 'and now property service...'
+
+# Wait for the property system to be up.
+while [ ! -S /dev/socket/property_service ]; do sleep 0.1; done
+echo 'property service up :)'
+
+# Wait for nvram to be loaded.
+while [ "$(getprop vendor.service.nvram_init)" != "Ready" ]; do sleep 0.2; done
+echo 'nvram init done'
+
+# Load connectivity kernel modules (MT6789 GKI 2.0 edition).
+modprobe wmt_chrdev_wifi
+modprobe wlan_drv_gen4m_6789
+# Silence all wlan module debugging down to just errors/warnings
+printf '0xFF:0x03' > /proc/net/wlan/dbgLevel
+echo 'wlan part1'
+modprobe bt_drv_connac1x
+modprobe gps_pwr
+modprobe gps_drv_stp
+modprobe fmradio_drv_mt6631_6635
+echo 'connectivity done'
+
+while [ "$(getprop vendor.mtk.nvram.ready)" != "1" ]; do sleep 0.2; done
+echo 'nvram ready'
+
+# enable Wi-Fi adapter in client mode
+while [ ! -e /dev/wmtWifi ]; do sleep 0.2; done
+echo S > /dev/wmtWifi
+echo 'wlan in station mode (part 2)!'

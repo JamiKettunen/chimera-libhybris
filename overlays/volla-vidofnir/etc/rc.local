@@ -1,0 +1,8 @@
+# lower panel backlight a bit more
+echo 50 > /sys/class/leds/lcd-backlight/brightness || :
+
+# turn on notification LED at very dim level
+echo 10 > /sys/class/leds/green/brightness || :
+
+# load MediaTek connectivity kernel modules and enable WLAN
+/usr/libexec/enable-mtk-connectivity &

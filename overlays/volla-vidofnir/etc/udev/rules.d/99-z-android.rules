@@ -1,0 +1,2 @@
+# mmcblk0 is the SD card, not internal storage (unlike /usr/lib/udev/rules.d/99-android.rules specifies)
+ACTION=="add|change", KERNEL=="mmcblk0*", ENV{UDISKS_SYSTEM}=""

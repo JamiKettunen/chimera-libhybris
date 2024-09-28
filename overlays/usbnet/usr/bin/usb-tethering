@@ -1,0 +1,158 @@
+#!/bin/sh
+# establish a local USB RNDIS network connection to this device
+#set -x
+#exec > /usb.log 2>&1
+
+####
+# Default profile
+USB_IDVENDOR=0FCE
+USB_IDPRODUCT=7169
+USB_IPRODUCT="Unknown"
+USB_ISERIAL="Unknown"
+# FIXME: read model from /vendor/build.prop (maybe via libhybris getprop), should run after android mount?
+USB_IMANUFACTURER="$(awk -F'"' '$1 ~ /^PRETTY_NAME/ {print $2}' /etc/os-release) Device"
+USBNET_CONFIGFS_FUNC="" # defaults to "rndis.usb0"
+USB_IFACE=""
+DISABLE_DHCP=""
+
+####
+# Override profile
+if [ -f /etc/default/usb-tethering-device ]; then
+    . /etc/default/usb-tethering-device
+fi
+
+ANDROID_USB=/sys/class/android_usb/android0
+# TODO: also NCM?!
+USB_FUNCTIONS=rndis
+LOCAL_IP=10.15.19.82
+CLIENT_IP=10.15.19.100
+GADGET_DIR=/sys/kernel/config/usb_gadget
+
+write() {
+    printf "%s" "$2" > "$1"
+}
+
+# This sets up the USB with whatever USB_FUNCTIONS are set to via configfs
+usb_setup_configfs() {
+    G_USB_ISERIAL=$GADGET_DIR/g1/strings/0x409/serialnumber
+
+    mkdir $GADGET_DIR/g1
+    write $GADGET_DIR/g1/idVendor                   "0x$USB_IDVENDOR"
+    write $GADGET_DIR/g1/idProduct                  "0x$USB_IDPRODUCT"
+    mkdir $GADGET_DIR/g1/strings/0x409
+    write $GADGET_DIR/g1/strings/0x409/serialnumber "$USB_ISERIAL"
+    write $GADGET_DIR/g1/strings/0x409/manufacturer "$USB_IMANUFACTURER"
+    write $GADGET_DIR/g1/strings/0x409/product      "$USB_IPRODUCT"
+
+    if echo $USB_FUNCTIONS | grep -q "rndis"; then
+        mkdir $GADGET_DIR/g1/functions/${USBNET_CONFIGFS_FUNC:-rndis.usb0}
+        mkdir $GADGET_DIR/g1/functions/rndis_bam.rndis
+    fi
+    echo $USB_FUNCTIONS | grep -q "mass_storage" && mkdir $GADGET_DIR/g1/functions/storage.0
+
+    mkdir $GADGET_DIR/g1/configs/c.1
+    mkdir $GADGET_DIR/g1/configs/c.1/strings/0x409
+    write $GADGET_DIR/g1/configs/c.1/strings/0x409/configuration "$USB_FUNCTIONS"
+
+    if echo $USB_FUNCTIONS | grep -q "rndis"; then
+        ln -s $GADGET_DIR/g1/functions/${USBNET_CONFIGFS_FUNC:-rndis.usb0} $GADGET_DIR/g1/configs/c.1
+        ln -s $GADGET_DIR/g1/functions/rndis_bam.rndis $GADGET_DIR/g1/configs/c.1
+    fi
+    echo $USB_FUNCTIONS | grep -q "mass_storage" && ln -s $GADGET_DIR/g1/functions/storage.0 $GADGET_DIR/g1/configs/c.1
+
+    ls /sys/class/udc | grep -v dummy | head -1 > $GADGET_DIR/g1/UDC
+}
+
+# This sets up the USB with whatever USB_FUNCTIONS are set to via android_usb
+usb_setup_android_usb() {
+    G_USB_ISERIAL=$ANDROID_USB/iSerial
+    write $ANDROID_USB/enable          0
+    write $ANDROID_USB/functions       ""
+    write $ANDROID_USB/enable          1
+    sleep 0.5 # delay attempting to remove rndis function
+    write $ANDROID_USB/enable          0
+    write $ANDROID_USB/idVendor        $USB_IDVENDOR
+    write $ANDROID_USB/idProduct       $USB_IDPRODUCT
+    write $ANDROID_USB/iManufacturer   "$USB_IMANUFACTURER"
+    write $ANDROID_USB/iProduct        "$USB_IPRODUCT"
+    write $ANDROID_USB/iSerial         "$USB_ISERIAL"
+    write $ANDROID_USB/functions       $USB_FUNCTIONS
+    write $ANDROID_USB/enable          1
+}
+
+# This determines which USB setup method is going to be used
+usb_setup() {
+    mount -t configfs configfs /sys/kernel/config || true
+
+    if [ -d $ANDROID_USB ]; then
+        usb_setup_android_usb
+    elif [ -d $GADGET_DIR ]; then
+        usb_setup_configfs
+    fi
+}
+
+usb_info() {
+    sleep 1
+    write $G_USB_ISERIAL "$1"
+    echo "$1" >> /var/log/usb_info.log
+}
+
+ip_setup() {
+    for usbnet_iface in ${USB_IFACE:-usb0 rndis0}; do
+        if ip addr add $LOCAL_IP/24 dev $usbnet_iface; then
+            USB_IFACE="$usbnet_iface"
+            ip link set $USB_IFACE up
+            usb_info "$USB_IMANUFACTURER on $USB_IFACE $LOCAL_IP"
+            if [ -x "$(command -v systemd-notify)" ]; then
+                systemd-notify --ready --status="$USB_IMANUFACTURER on $USB_IFACE $LOCAL_IP"
+            else
+                #printf "READY=1" >&"$HYBRIS_USB_READY_FD"
+                echo 1 >&4
+            fi
+            return
+        fi
+    done
+
+    usb_info "could not setup USB IP for tethering!"
+    if [ -x "$(command -v systemd-notify)" ]; then
+        systemd-notify --ready --status="could not setup USB IP for tethering!"
+    else
+        #printf "READY=1" >&"$HYBRIS_USB_READY_FD"
+        echo 1 >&4
+    fi
+    exit 1
+}
+
+dhcpd_start() {
+    if [ -n "$DISABLE_DHCP" ]; then
+        usb_info "not starting DHCP server on $LOCAL_IP"
+        return
+    fi
+
+    if command -v dhcpd >/dev/null; then
+        mkdir -p /run/hybris-usb
+        touch /run/hybris-usb/dhcpd4.lease
+        dhcpd -f -4 -q -cf /etc/hybris-usb/dhcpd.conf -pf /run/hybris-usb/dhcpd4.pid -lf /run/hybris-usb/dhcpd4.lease
+    elif command -v dnsmasq >/dev/null; then
+        # interface $USB_IFACE (usb0)
+        # phone $LOCAL_IP (10.15.19.82)
+        # pc $CLIENT_IP (10.15.19.100)
+        # FIXME: results in no IP (e.g. 169.254.31.172) given to client :/
+        # TODO: once working swap --no-daemon for --keep-in-foreground
+        dnsmasq --no-daemon --port=0 --conf-file=/dev/null --dhcp-leasefile=/dev/null \
+                --interface=$USB_IFACE --dhcp-option=option:router,$LOCAL_IP --dhcp-range=$CLIENT_IP,$CLIENT_IP,infinite \
+                --log-debug --log-async --log-dhcp --log-facility=/var/log/dnsmasq.log
+        # --bind-interfaces --except-interface=lo, "...,255.255.255.0,infinite"
+        # -G, --dhcp-host=<hostspec>                             Set address or hostname for a specified machine.
+        # --leasefile-ro                                     Do not use leasefile.
+        # dnsmasq --address=/math.lab/10.241.3.3 --address=/cantina.company/10.241.4.4 &
+        # --listen-address=$CLIENT_IP
+        # dnsmasq -C /dev/null -i usb0 -p 0
+    elif command -v unudhcpd >/dev/null; then
+        unudhcpd -i $USB_IFACE -s $LOCAL_IP -c $CLIENT_IP
+    fi
+}
+
+usb_setup
+ip_setup
+dhcpd_start

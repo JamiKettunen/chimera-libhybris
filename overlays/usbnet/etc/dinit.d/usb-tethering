@@ -1,0 +1,7 @@
+type = process
+command = /usr/bin/usb-tethering
+before = pre-network.target
+depends-on = pre-local.target
+logfile = /var/log/usb-tethering.log
+ready-notification = pipefd:4
+#ready-notification = pipevar:USB_TETHERING_READY_FD

@@ -200,10 +200,6 @@ set -ex
 
 # don't keep "apk add"ed package .apks in /etc/apk/cache (/var/cache/apk) in final rootfs
 apk add !apk-tools-cache
-
-# prepare early-swclock file timestamp already here to have somewhat accurate
-# time on initial boot potentially even without networking
-touch /var/lib/swclock/timestamp
 EOC
 	$SUDO umount "$WORKDIR/var/cache/apk"
 	$SUDO rmdir "$WORKDIR/var/cache/apk"

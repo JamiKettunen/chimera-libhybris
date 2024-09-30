@@ -126,6 +126,15 @@ sed -i '' 's:ACTIVE_CONSOLES=.*:ACTIVE_CONSOLES="/dev/tty1":' /etc/default/conso
 # HACK: facilitate booting from rootfs.img loopback mounted from userdata
 sed -i '' 's/exec //; /dinit_early_root_remount/ s/$/ || :/' /usr/lib/dinit.d/early/scripts/root-remount.sh
 
+# HACK: verbose dinit logs into rootfs by default due to most likely no working VT
+cat <<'EOF' > /usr/bin/preinit
+#!/bin/sh
+>/dinit.log
+exec /usr/bin/dinit "$@" --log-level debug --log-file /dinit.log
+EOF
+chmod +x /usr/bin/preinit
+ln -sf preinit /usr/bin/init
+
 # HACK: avoid failing early-udev-trigger on every boot on Volla Phone X23
 # - "udevadm trigger --action=add" exits with code 1
 #   - X23: sc8551-standalone: Failed to write 'add' to '/sys/devices/platform/soc/11f00000.i2c/i2c-7/7-0066/power_supply/sc8551-standalone/uevent': Invalid argument

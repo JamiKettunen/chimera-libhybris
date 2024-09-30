@@ -60,6 +60,10 @@ PATH=$PWD/chimera-install-scripts:$PATH
 2. e.g. `qemu-aarch64-static` is installed and its binfmt setup already done
 3. `sudo` is used, otherwise e.g. `echo 'SUDO=doas' > config.local.sh`
 
+Do note that performing package updates to `dinit-chimera` and `udev` WILL render the device
+unbootable until hacks from [`mkrootfs.sh`](mkrootfs.sh) to e.g. `/usr/lib/dinit.d/early/scripts/root-remount.sh`
+etc are reapplied manually before reboot!
+
 
 ## Deploying and booting
 NOTE: We call the `rootfs.img` instead as `ubuntu.img` when using Halium initrd to make the cleanest

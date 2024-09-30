@@ -108,13 +108,7 @@ EOC
 $SUDO $CHROOT_WRAPPER "$WORKDIR" <<'EOC'
 set -ex
 
-# make Halium initrd play ball and mount its stuff in a more sensible place (we want all under /android)..
-# this is more or less the ideal cleanest config, rest of the stuff is cleaned up in /usr/lib/lxc-android/mount-android
-# for reference: https://github.com/Halium/initramfs-tools-halium/blob/dynparts/scripts/halium
-mkdir -p /var/lib/lxc/android/rootfs
-touch /var/lib/lxc/android/rootfs/MOUNTED_AT_root-android
-
-# let's make a relative /data symlink by default while at it (instead of absolute one from Halium initrd) :^)
+# let's make a relative /data symlink instead of absolute one by default coming from Halium initrd :^)
 ln -sr /android/data /data
 
 # get a read-write rootfs by default when using Halium initrd (without having to create this in userdata root otherwise)

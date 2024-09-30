@@ -124,7 +124,7 @@ touch /.writable_image
 sed -i '' 's:ACTIVE_CONSOLES=.*:ACTIVE_CONSOLES="/dev/tty1":' /etc/default/console-setup
 
 # HACK: facilitate booting from rootfs.img loopback mounted from userdata
-sed -i '' 's/exec //; /dinit_early_root_remount/ s/\/$/ || :/' /usr/lib/dinit.d/early/scripts/root-remount.sh
+sed -i '' 's/exec //; /dinit_early_root_remount/ s/$/ || :/' /usr/lib/dinit.d/early/scripts/root-remount.sh
 
 # HACK: avoid failing early-udev-trigger on every boot on Volla Phone X23
 # - "udevadm trigger --action=add" exits with code 1

@@ -22,7 +22,7 @@ cross-building on a foreign (non-Chimera Linux) x86_64 host:
 # NOTE: adjust target Halium version as needed
 halium_version=12
 
-git clone clone https://github.com/JamiKettunen/cports -b hybris ~/cports
+git clone https://github.com/JamiKettunen/cports -b hybris ~/cports
 pushd ~/cports
 wget https://repo.chimera-linux.org/apk/apk-x86_64-3.0.0_pre6-r0.static -O apk
 chmod +x apk

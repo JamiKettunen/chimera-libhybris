@@ -9,9 +9,10 @@ too where ever you may have root):
 ```sh
 adb shell
 
-mount /data
+mountpoint -q /data || mount /data
 mkdir -p /root
 e2fsck -fy /data/ubuntu.img
+
 mount /data/ubuntu.img /root
 mount --bind /proc /root/proc
 mount --bind /sys /root/sys
@@ -21,7 +22,7 @@ env -i HOME=/root PS1='(chroot) \w \$ ' TERM=xterm-256color $(which chroot) /roo
 For installing package files you can `adb push whatever.apk /root` and in chroot e.g.
 `apk --no-network add /*.apk && rm /*.apk`
 
-For tearing it down `adb shell 'umount /root/proc /root/sys /root/dev /root /data && sync && reboot'`
+For tearing it down `adb shell 'umount /root/proc /root/sys /root/dev /root /data; sync && reboot'`
 from host should do the trick
 
 

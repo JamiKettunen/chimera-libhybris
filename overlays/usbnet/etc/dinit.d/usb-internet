@@ -1,6 +1,5 @@
 type = scripted
-# TODO: configurable USB device instead of hardcoded usb0
-command = /usr/bin/ip route add default via 10.15.19.100 dev usb0
+command = /usr/bin/ip route add default via 10.15.19.100
 stop-command = /usr/bin/ip route del default via 10.15.19.100
 before = time-sync.target
 depends-on = usb-tethering

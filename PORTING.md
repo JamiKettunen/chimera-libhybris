@@ -37,14 +37,21 @@ the historically tiny/otherwise space constrained `system` partition (which also
 difficult to mount/debug on modern devices with `super` partition):
 ```sh
 unpack_bootimg --boot_img vendor_boot.img --format=mkbootimg > mkbootimg_args
-sed 's: systempart=/dev/mapper/system::' -i mkbootimg_args
-sh -c "mkbootimg $(cat mkbootimg_args) --vendor_boot chimera-vendor_boot.img" && rm -r out
+sed -i 's: systempart=/dev/mapper/system::' mkbootimg_args
+sh -c "mkbootimg $(cat mkbootimg_args) --vendor_boot chimera-vendor_boot.img" && rm -r out mkbootimg_args
 fastboot flash vendor_boot chimera-vendor_boot.img reboot recovery
 ```
-This assumes you have `unpack_bootimg` etc from https://github.com/LineageOS/android_system_tools_mkbootimg
-installed via `android-tools` (https://github.com/nmeum/android-tools) or similar. For non-GKI
-devices without `vendor_boot` partition replace all instances of it with just `boot` and
-swap `--vendor_boot` for `--out`.
+For older non-GKI devices without `vendor_boot` or `super` partitions instead use:
+```sh
+unpack_bootimg --boot_img boot.img --format=mkbootimg > mkbootimg_args
+sed -i 's: systempart=/dev/disk/by-partlabel/system::' mkbootimg_args
+sh -c "mkbootimg $(cat mkbootimg_args) --out chimera-boot.img" && rm -r out mkbootimg_args
+fastboot flash boot chimera-boot.img reboot recovery
+```
+These assume you have `unpack_bootimg` etc from https://github.com/LineageOS/android_system_tools_mkbootimg
+installed via `android-tools` (https://github.com/nmeum/android-tools) or similar. For some devices
+`fastboot reboot recovery` may also be non-functional and you'll have to do the usual device-specific
+button combo to enter it or *also* flash `recovery` partition with the `boot.img`.
 
 Once booted to the UBports recovery successfully you may verify `systempart=` is gone from
 `/proc/cmdline` as well.

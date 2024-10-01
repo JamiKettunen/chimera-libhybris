@@ -38,11 +38,20 @@ user/halium-gsi-$halium_version.0
 for p in $pkgs; do ./cbuild pkg -a aarch64 ${p}; done
 popd
 
-mkdir -p overlays/{base,halium-$halium_version}/pkgs
+rm -rf overlays/{base,halium-$halium_version}/pkgs
+mkdir overlays/{base,halium-$halium_version}/pkgs
 mv ~/cports/packages/user/aarch64/halium-gsi-$halium_version*.apk overlays/halium-$halium_version/pkgs/
 cp ~/cports/packages/main/aarch64/dinit-*.apk overlays/base/pkgs/
 cp ~/cports/packages/user/aarch64/*.apk overlays/base/pkgs/
 rm overlays/base/pkgs/*-{headers,devel,doc}-*.apk
+```
+At this point before creating new rootfs images you should always force pull latest changes locally
+(or even rebase the https://github.com/JamiKettunen/cports/tree/hybris clone on latest upstream
+https://github.com/chimera-linux/cports/tree/master) and rebuild *all* packages after e.g.
+`rm -r packages/{main,user}/aarch64`; you may want to enable ccache in `etc/config.ini` as follows:
+```ini
+[build]
+ccache = yes
 ```
 
 

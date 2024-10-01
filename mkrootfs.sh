@@ -30,6 +30,7 @@ cd "$(readlink -f "$(dirname "$0")")" # dir of this script
 tarball="chimera-linux-$ARCH-ROOTFS-$DATE-bootstrap.tar.gz"
 url="https://repo.chimera-linux.org/live/$DATE/$tarball"
 host_arch=$(uname -m)
+qemu_bin=""
 
 set -x # log every executed command
 mountpoint -q "$WORKDIR" && $SUDO umount -R "$WORKDIR"
@@ -46,7 +47,15 @@ $SUDO mount "$OUT_ROOTFS" "$WORKDIR"
 [ -f "$tarball" ] || wget "$url"
 $SUDO tar xfp "$tarball" -C "$WORKDIR"
 
-[ "$host_arch" != "$ARCH" ] && $SUDO cp "$(command -v qemu-$ARCH-static)" "$WORKDIR/usr/bin"
+if [ "$host_arch" != "$ARCH" ]; then
+	qemu_bin="$(command -v qemu-$ARCH-static)"
+	[ -z "$qemu_bin" ] && qemu_bin="$(command -v qemu-$ARCH)"
+	if [ -z "$qemu_bin" ]; then
+		echo "ERROR: Missing proper binfmt + QEMU user setup for $ARCH (cmd:qemu-$ARCH{-static,})"
+		exit 1
+	fi
+	$SUDO cp "$qemu_bin" "$WORKDIR/usr/bin"
+fi
 
 if [ "$APK_CACHE" ]; then
 	[ ! -d "$APK_CACHE" ] && mkdir "$APK_CACHE"
@@ -207,7 +216,7 @@ EOC
 	$SUDO umount "$WORKDIR/var/cache/apk"
 	$SUDO rmdir "$WORKDIR/var/cache/apk"
 fi
-[ "$host_arch" != "$ARCH" ] && $SUDO rm "$WORKDIR/usr/bin/qemu-$ARCH-static"
+[ "$qemu_bin" ] && $SUDO rm "$WORKDIR/usr/bin/${qemu_bin##*/}"
 $SUDO umount "$WORKDIR"
 
 e2fsck -fy "$OUT_ROOTFS"

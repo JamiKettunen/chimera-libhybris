@@ -38,6 +38,10 @@ sed -i '' '/log/d' /etc/fstab
 This is created by [`/usr/bin/dinit-panic`](overlays/base/usr/bin/dinit-panic) which you may tweak
 in chroot, but you should continue to the section below.
 
+Note that on some devices it may not reboot automatically to recovery mode on failure but just keeps
+bootlooping without success, so be sure to check for this file in rootfs after entering recovery
+manually!
+
 ## Getting debug logs out of dinit
 We need to create a `/usr/bin/init` wrappers script for debug logs from `chroot`:
 ```sh

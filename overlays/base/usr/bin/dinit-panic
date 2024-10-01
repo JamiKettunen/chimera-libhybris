@@ -1,6 +1,7 @@
 #!/bin/sh
 # Since we're running on a mobile device without working VT the best we can really
-# do is save some logs to rootfs for further analysis from recovery mode
+# do is setup USB networking and SSH, or just save some logs to rootfs for further
+# analysis from recovery mode
 YELLOW="$(printf '%b' '\033')[1;33m"
 NORMAL="$(printf '%b' '\033')[0m"
 set -x
@@ -12,6 +13,7 @@ ps -ef
 ps -wlT
 ss -a
 mount
+cat /proc/filesystems
 sshd -V
 
 # USB debug setup

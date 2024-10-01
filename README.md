@@ -72,13 +72,15 @@ possible mount hierarchy configuration on final rootfs without polluting it with
 - place generated rootfs image as `ubuntu.img` on `userdata` root (unencrypted, ext4!)
   - with device in e.g. UBports recovery (TWRP should work too minus `simg` steps), run on host:
 ```sh
-# NOTE: simg song and dance can require up to 2x $SIZE set in mkrootfs.sh/config.*.sh of free space
-# on both the host /tmp and target userdata!
-adb shell 'mount /data'
-img2simg /tmp/chimera-rootfs.img /tmp/chimera-rootfs.simg && rm /tmp/chimera-rootfs.img
-adb push /tmp/chimera-rootfs.simg /data/rootfs.simg
-adb shell 'simg2img /data/rootfs.simg /data/ubuntu.img && rm /data/rootfs.simg && chmod 644 /data/ubuntu.img'
-adb shell 'sync && reboot'
+adb shell 'mountpoint -q /data || mount /data'
+
+# NOTE: you may optionally use compression via e.g.
+mv /tmp/chimera-rootfs.img /tmp/ubuntu.img && xz /tmp/ubuntu.img && \
+  adb push /tmp/ubuntu.img.xz /data && adb shell unxz /data/ubuntu.img.xz
+# or just wait out the transfer over USB
+adb push /tmp/chimera-rootfs.img /data/ubuntu.img
+
+adb shell 'chmod 644 /data/ubuntu.img && sync && reboot'
 ```
 
 

@@ -24,5 +24,5 @@ fi
 
 cat <<'EOF'
 >> NOTE: Consider 'apk add resolvconf-none' if in early bringup without WLAN for a while to avoid the need to
-   remove broken /etc/resolv.conf symlink each boot and instead writing e.g. 'nameserver 1.1.1.1'
+   e.g. 'rm /etc/resolv.conf; echo "nameserver 1.1.1.1" > /etc/resolv.conf'
 EOF

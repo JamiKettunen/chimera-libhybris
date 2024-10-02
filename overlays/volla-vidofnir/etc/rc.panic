@@ -1,0 +1,18 @@
+# blink the notification LED and display backlight in case of dinit boot failure
+cat <<'EOF' > /run/user/blink-led
+#!/bin/sh
+sysfs1=/sys/class/leds/lcd-backlight/brightness
+sysfs2=/sys/class/leds/green/brightness
+for i in $(seq 1 3); do
+  echo 255 > $sysfs1
+  echo 255 > $sysfs2
+  sleep 1
+  echo 0 > $sysfs1
+  echo 0 > $sysfs2
+  sleep 1
+done
+echo 10 > $sysfs1
+echo 10 > $sysfs2
+EOF
+chmod +x /run/user/blink-led
+/run/user/blink-led &

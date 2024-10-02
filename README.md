@@ -94,7 +94,8 @@ adb shell 'chmod 644 /data/ubuntu.img && sync && reboot'
 
 
 ### Logging in (via USB)
-As your SSH public key (`~/.ssh/id_rsa.pub`) is copied onto the rootfs by default you should be able to log in as both `hybris` (default password: `1234`) and `root`.
+As your SSH public key (`~/.ssh/id_rsa.pub`) is copied onto the rootfs by default you should be able
+to log in as both `hybris` (default password: `1234`) and `root`.
 ```sh
 ssh hybris@10.15.19.82
 # or

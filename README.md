@@ -30,10 +30,10 @@ PATH=$PWD:$PATH
 ./cbuild keygen
 ./cbuild binary-bootstrap
 pkgs="
-main/dinit
-user/libgbinder
 user/wayfire-droidian
 user/halium-gsi-$halium_version.0
+user/libgbinder
+main/dinit
 "
 for p in $pkgs; do ./cbuild pkg -a aarch64 ${p}; done
 popd

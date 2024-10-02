@@ -35,6 +35,8 @@ mount --bind /run/debug-motd /etc/motd
 # Assuming USB networking can be setup we should hang here (until dhcpd is killed)...
 usb-tethering
 
+# In case the above fails perhaps we can at least see the potential USB interface
+ip a
 pkill sshd
 
 # FIXME: Only seems to reboot normally on vidofnir..

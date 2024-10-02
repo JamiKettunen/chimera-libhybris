@@ -8,8 +8,7 @@ case $- in
 esac
 
 # prompt about running initial tests on first successful boot (not dinit-panic) and when not yet asked
-# TODO better dinit-panic detection..
-if [ -f /run/dinit/first-boot ] && [ ! -f /tmp/.chimera_no_libhybris_tests ] && grep -q '^/usr/bin/dinit' /proc/1/cmdline; then
+if [ -f /run/dinit/first-boot ] && [ ! -f /tmp/.chimera_no_libhybris_tests ] && [ ! -f /run/dinit/failed-boot ]; then
     touch /tmp/.chimera_no_libhybris_tests
     read -p 'Run quick initial boot libhybris/Halium Android container tests (Y/n)? ' ans
     case "${ans^^}" in 'Y'*|'') doas chimera-libhybris-tests ;; esac

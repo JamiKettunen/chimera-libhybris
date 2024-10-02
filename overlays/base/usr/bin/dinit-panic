@@ -20,7 +20,7 @@ sshd -V
 ssh-keygen -A
 /usr/bin/sshd
 
-touch /etc/motd
+touch /etc/motd /run/dinit/failed-boot
 cp /dinit.log /run/debug-motd
 cat <<EOF >> /run/debug-motd
 ${YELLOW}NOTICE: The current boot has failed and above is contents of /dinit.log; all of this was setup via

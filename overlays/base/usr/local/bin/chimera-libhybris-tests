@@ -64,6 +64,7 @@ else
 fi
 echo "libhybris getprop working: ${getprop_working}${NORMAL}"
 cmd "getprop ro.build.version.sdk"
+cmd "getprop ro.vndk.version"
 echo
 
 

@@ -129,6 +129,15 @@ sed -i '' 's:ACTIVE_CONSOLES=.*:ACTIVE_CONSOLES="/dev/tty1":' /etc/default/conso
 # HACK: facilitate booting from rootfs.img loopback mounted from userdata
 sed -i '' 's/exec //; /dinit_early_root_remount/ s/$/ || :/' /usr/lib/dinit.d/early/scripts/root-remount.sh
 
+# HACK: facilitate booting on version <=v4.12 kernels, fixes:
+# - cgroup2: unknown option "nsdelegate"
+#   -> is this already a default mount option when running on modern kernels? drop always if so
+#   - cheeseburger/dumpling?: mount without the option
+# - mount: /sys/fs/cgroup: unknown filesystem type 'cgroup2'
+#   - yggdrasil: fallback mount legacy non-unified cgroup hierarchy
+#   - cgroups-v1.sh source: https://github.com/chimera-linux/dinit-chimera/commit/c43985d
+sed -i '' '/cgroup2/ s;$; || mount -t cgroup2 cgroup2 "/sys/fs/cgroup" || ./early/scripts/cgroups-v1.sh;' /usr/lib/dinit.d/early/scripts/cgroups.sh
+
 # HACK: verbose dinit logs into rootfs by default due to most likely no working VT
 cat <<'EOF' > /usr/bin/preinit
 #!/bin/sh
@@ -148,10 +157,6 @@ sed -i '' 's!exec /usr/bin/udevadm trigger --action=add!/usr/bin/udevadm trigger
 ln -sr / /usr/aarch64-chimera-linux-musl
 
 
-
-# HACK: facilitate booting on version <=v4.12 kernels, fixes cgroup2: unknown option "nsdelegate"
-# -> is this already a default option when running on modern kernels? upstream removal of "-o nsdelegate" if so
-#sed -i '' '/cgroup2/ s:$: || mount -t cgroup2 cgroup2 "/sys/fs/cgroup":' /usr/lib/dinit.d/early/scripts/cgroups.sh
 
 # HACK: avoid getting stuck with downstream (as tested on OnePlus 5's v4.4) kernel
 #sed -i '' 's!exec /usr/bin/udevadm settle!/usr/bin/udevadm settle --timeout=3; exit 0!' /usr/libexec/dinit-devd

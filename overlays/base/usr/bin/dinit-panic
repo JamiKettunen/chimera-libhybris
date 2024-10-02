@@ -7,6 +7,8 @@ NORMAL="$(printf '%b' '\033')[0m"
 set -x
 exec > /dinit-panic.log 2>&1
 
+[ -x /etc/rc.panic ] && . /etc/rc.panic
+
 # Infodump
 dmesg
 ps -ef

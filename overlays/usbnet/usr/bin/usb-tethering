@@ -106,8 +106,7 @@ ip_setup() {
             if [ -x "$(command -v systemd-notify)" ]; then
                 systemd-notify --ready --status="$USB_IMANUFACTURER on $USB_IFACE $LOCAL_IP"
             else
-                #printf "READY=1" >&"$HYBRIS_USB_READY_FD"
-                echo 1 >&4
+                [ "$USB_TETHERING_READY_FD" ] && echo > /dev/fd/$USB_TETHERING_READY_FD
             fi
             return
         fi
@@ -117,8 +116,7 @@ ip_setup() {
     if [ -x "$(command -v systemd-notify)" ]; then
         systemd-notify --ready --status="could not setup USB IP for tethering!"
     else
-        #printf "READY=1" >&"$HYBRIS_USB_READY_FD"
-        echo 1 >&4
+        [ "$USB_TETHERING_READY_FD" ] && echo > /dev/fd/$USB_TETHERING_READY_FD
     fi
     exit 1
 }
@@ -133,6 +131,8 @@ dhcpd_start() {
         mkdir -p /run/hybris-usb
         touch /run/hybris-usb/dhcpd4.lease
         dhcpd -f -4 -q -cf /etc/hybris-usb/dhcpd.conf -pf /run/hybris-usb/dhcpd4.pid -lf /run/hybris-usb/dhcpd4.lease
+    elif command -v unudhcpd >/dev/null; then
+        unudhcpd -i $USB_IFACE -s $LOCAL_IP -c $CLIENT_IP
     elif command -v dnsmasq >/dev/null; then
         # interface $USB_IFACE (usb0)
         # phone $LOCAL_IP (10.15.19.82)
@@ -148,8 +148,6 @@ dhcpd_start() {
         # dnsmasq --address=/math.lab/10.241.3.3 --address=/cantina.company/10.241.4.4 &
         # --listen-address=$CLIENT_IP
         # dnsmasq -C /dev/null -i usb0 -p 0
-    elif command -v unudhcpd >/dev/null; then
-        unudhcpd -i $USB_IFACE -s $LOCAL_IP -c $CLIENT_IP
     fi
 }
 

@@ -26,6 +26,7 @@ cat <<EOF >> /run/debug-motd
 ${YELLOW}NOTICE: The current boot has failed and above is contents of /dinit.log; all of this was setup via
         /usr/bin/dinit-panic and you may find more logs of interest in /dinit-panic.log${NORMAL}
 	You may reboot (to recovery) via 'sync && reboot --system'
+
 EOF
 mount --bind /run/debug-motd /etc/motd
 

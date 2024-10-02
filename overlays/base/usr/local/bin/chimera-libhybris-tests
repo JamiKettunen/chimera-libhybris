@@ -1,0 +1,107 @@
+#!/bin/sh
+
+RED="$(printf '%b' '\033')[1;31m"
+GREEN="$(printf '%b' '\033')[1;32m"
+YELLOW="$(printf '%b' '\033')[1;33m"
+BOLD="$(printf '%b' '\033')[1m"
+NORMAL="$(printf '%b' '\033')[0m"
+
+red() { printf '%s' "$RED"; }
+green() { printf '%s' "$GREEN"; }
+yellow() { printf '%s' "$YELLOW"; }
+
+cmd() {
+  command="$1"
+  output="$2"
+  echo "${BOLD}# $command${NORMAL}"
+  [ "$output" ] && echo "$output" || $command
+}
+
+dinit_status() {
+    service=$1
+    fancy_name="${2:-$service}"
+    log="${3:-/var/log/$service.log}"
+    status="$(dinitctl status $service)"
+    case "$status" in
+    *STARTED*)
+        started="started ok!"
+        green
+        ;;
+    *)
+        started="not started :/"
+        red
+        ;;
+    esac
+    echo "$fancy_name status: ${started}${NORMAL}"
+    cmd "dinitctl status $service" "$status"
+    cmd "cat $log"
+    echo
+}
+
+
+echo
+dinit_pending="$(dinitctl list | grep -Ev '^\[(\{|\[)+')"
+[ "$dinit_pending" ] && dinit_pending_count=$(echo "$dinit_pending" | wc -l | xargs) || dinit_pending_count=0
+[ "$dinit_pending_count" -gt 0 ] && yellow || green
+echo "Pending dinit services: ${dinit_pending_count}${NORMAL}"
+cmd "dinitctl list | grep -Ev '^\[(\{|\[)+'" "$dinit_pending"
+echo
+
+
+dinit_status android-mounts "Android mounts"
+
+
+dinit_status lxc-android "Halium LXC container"
+
+
+apilevel="getprop ro.build.version.sdk 2>/dev/null"
+if [ "$apilevel" ]; then
+    getprop_working="yes!"
+    green
+else
+    getprop_working="no :("
+    red
+fi
+echo "libhybris getprop working: ${getprop_working}${NORMAL}"
+cmd "getprop ro.build.version.sdk"
+echo
+
+
+android_lsof="$(lsof /android 2>/dev/null)"
+[ "$android_lsof" ] && android_lsof_count=$(echo "$android_lsof" | wc -l | xargs) || android_lsof_count=0
+if [ "$android_lsof_count" -gt 0 ]; then
+    echo "$android_lsof" > /tmp/lsof-android.log
+    open_files="yes (${android_lsof_count})! check /tmp/lsof-android.log for output of 'lsof /android'"
+    green
+else
+    open_files="none :("
+    red
+fi
+echo "Open files under /android: ${open_files}${NORMAL}"
+echo
+
+
+HYBRIS_LD_DEBUG=1 test_sensors > /tmp/sensors.log 2>&1
+sensors="$(test_sensors 2>/dev/null)"
+sensors_count=$(echo "$sensors" | grep -c ' Sensor ')
+if [ "$sensors_count" -gt 0 ]; then
+    sensors_available="yes (${sensors_count})!"
+    green
+else
+    sensors_available="no :("
+    red
+fi
+echo "Sensors available: ${sensors_available} check /tmp/sensors.log for output of 'HYBRIS_LD_DEBUG=1 test_sensors'${NORMAL}"
+echo
+
+
+HYBRIS_LD_DEBUG=1 test_egl_configs > /tmp/egl_configs.log 2>&1
+if test_egl_configs 2>/dev/null; then
+    egl_configs="yes ($(grep -c ' Configuration #' /tmp/egl_configs.log))!"
+    green
+else
+    egl_configs="none :("
+    red
+fi
+echo "EGL configs available: ${egl_configs} check /tmp/egl_configs.log for output of 'HYBRIS_LD_DEBUG=1 test_egl_configs'${NORMAL}"
+echo

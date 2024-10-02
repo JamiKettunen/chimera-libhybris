@@ -79,6 +79,7 @@ rebooting in a loop while trying to boot:
 ```sh
 # alternatively "apk add !{lxc-android,halium-wrappers}-dinit-links"
 rm /usr/lib/dinit.d/boot.d/{android.target,android-hwcomposer}
+rm /etc/dinit.d/boot.d/greetd
 
 dinitctl -o disable networkmanager
 dinitctl -o disable usb-internet

@@ -38,8 +38,9 @@ rm -f "$OUT_ROOTFS"
 
 fallocate -l $SIZE "$OUT_ROOTFS"
 # NOTE: features disabled that makes halium initrd & recoveries unhappy to work with the ext4 image files
-# https://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg1896675.html
-mkfs.ext4 -b 4096 -O '^metadata_csum_seed,^orphan_file' -m 0 -F "$OUT_ROOTFS"
+# FEATURE_C12 (orphan_file): https://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg1896675.html
+# The below works with Halium 9 recovery + e2fsck 1.42.9 (28-Dec-2013)
+mkfs.ext4 -b 4096 -O '^metadata_csum,^orphan_file' -m 0 -F "$OUT_ROOTFS"
 
 [ ! -d "$WORKDIR" ] && mkdir -p "$WORKDIR"
 $SUDO mount "$OUT_ROOTFS" "$WORKDIR"

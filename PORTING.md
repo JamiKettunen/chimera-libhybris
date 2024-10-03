@@ -30,7 +30,8 @@ want for your own device after creating them under [`overlays/`](overlays/)
 ## Re-using boot.img from Ubuntu Touch
 As an example for Volla Phone X23 download from https://system-image.ubports.com/devel/arm64/android9plus/daily/vidofnir_esim/index.json
 last entry the boot tarball (containing `*boot.img` + potentially interesting device-specific hacks
-for later).
+for later). For older (but still treble-compatible devices) with full systemimage builds this would
+instead be inside device tarball with the hacks in `android-rootfs.img/system/halium`.
 
 Make sure to remove `systempart=...` from kernel cmdline unless you don't mind having the rootfs in
 the historically tiny/otherwise space constrained `system` partition (which also happens to be more

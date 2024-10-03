@@ -107,7 +107,7 @@ ssh hybris@10.15.19.82
 
 ## Internet access over USB
 With USB network and SSH access established run [`./tethering.sh`](tethering.sh) in the repo clone
-root directory.
+root directory **and read its output** for further steps.
 
 
 ## Check service statuses

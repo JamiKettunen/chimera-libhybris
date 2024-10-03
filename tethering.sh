@@ -17,12 +17,12 @@ fi
 
 if [ $MANUAL_STEPS_NEEDED -eq 1 ]; then
         cat <<'EOF'
->> Now run 'dinitctl start usb-internet' or 'ip route add default via $RNDIS_USB_HOST dev usb0' on your device!
+>> Now run 'dinitctl start usb-internet' or 'ip route add default via $RNDIS_USB_HOST' on your device!
    (running 'dinitctl stop usb-internet' or 'ip route del default via $RNDIS_USB_HOST' will undo this)
 EOF
 fi
 
 cat <<'EOF'
 >> NOTE: Consider 'apk add resolvconf-none' if in early bringup without WLAN for a while to avoid the need to
-   e.g. 'rm /etc/resolv.conf; echo "nameserver 1.1.1.1" > /etc/resolv.conf'
+   e.g. 'rm /etc/resolv.conf; echo "nameserver 1.1.1.1" > /etc/resolv.conf' on every boot
 EOF

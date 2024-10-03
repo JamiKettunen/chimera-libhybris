@@ -98,6 +98,16 @@ adb shell 'chmod 644 /data/ubuntu.img && sync && reboot'
 ```
 
 
+### Logging in (via USB)
+As your SSH public key (`~/.ssh/id_rsa.pub`) is copied onto the rootfs by default you should be able
+to log in as both `hybris` (default password: `1234`) and `root`.
+```sh
+ssh hybris@10.15.19.82
+# or
+ssh root@10.15.19.82
+```
+
+
 ## Growing existing rootfs image size
 You may resize this file at will with the following if the preconfigured `SIZE` from [`mkrootfs.sh`](mkrootfs.sh)
 (or the loaded configurations files) isn't enough and your recovery environment has `resize2fs`:
@@ -110,16 +120,6 @@ with rootfs unmounted to avoid corrupting the filesystem!
 doas resize2fs /userdata/ubuntu.img 8G
 doas reboot
 doas resize2fs /userdata/ubuntu.img
-```
-
-
-### Logging in (via USB)
-As your SSH public key (`~/.ssh/id_rsa.pub`) is copied onto the rootfs by default you should be able
-to log in as both `hybris` (default password: `1234`) and `root`.
-```sh
-ssh hybris@10.15.19.82
-# or
-ssh root@10.15.19.82
 ```
 
 

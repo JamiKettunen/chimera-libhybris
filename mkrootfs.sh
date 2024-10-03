@@ -189,6 +189,15 @@ fi
 for overlay in "${OVERLAYS[@]}"; do
 	[ -d "overlays/$overlay" ] || continue
 	$SUDO cp -r "overlays/$overlay"/* "$WORKDIR"
+	if [ -f "$WORKDIR/deploy-host.sh" ]; then
+		(. "$WORKDIR/deploy-host.sh")
+		$SUDO rm "$WORKDIR/deploy-host.sh"
+	fi
+	if [ -f "$WORKDIR/deploy.sh" ]; then
+		$SUDO chmod +x "$WORKDIR/deploy.sh"
+		$SUDO $CHROOT_WRAPPER "$WORKDIR" /deploy.sh
+		$SUDO rm "$WORKDIR/deploy.sh"
+	fi
 done
 
 $SUDO $CHROOT_WRAPPER "$WORKDIR" <<'EOC'

@@ -14,6 +14,11 @@ Since I don't yet have proper kernel/base package cports integration done for an
 treble Android 9–13 device and existing Halium adapted kernel artifacts (`*boot.img` and modules as
 needed) ready to deploy.
 
+Currently known booting ports include:
+- Halium 9 based [`Volla Phone`](config.yggdrasil.sh) with kernel v4.4 and MediaTek Helio P23 (MT6763) SoC
+- Halium 12 based [`Volla Phone X23`](config.vidofnir.sh) with kernel v5.10 and MediaTek Helio G99 (MT6789) SoC
+- Maybe even your device...?
+
 
 ## Building some extra packages
 Before generating a rootfs image we need to build some required packages. Assuming you're

@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# blink the display backlight in case of dinit boot failure
+cat <<'EOF' > /run/user/blink-led
+#!/bin/sh
+sysfs=/sys/class/leds/lcd-backlight/brightness
+for i in $(seq 1 3); do
+  echo 255 > $sysfs
+  sleep 1
+  echo 0 > $sysfs
+  sleep 1
+done
+echo 10 > $sysfs
+EOF
+chmod +x /run/user/blink-led
+/run/user/blink-led &

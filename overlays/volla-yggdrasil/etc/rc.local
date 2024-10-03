@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# lower panel backlight a bit more
+echo 50 > /sys/class/leds/lcd-backlight/brightness || :

@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # blink the notification LED and display backlight in case of dinit boot failure
 cat <<'EOF' > /run/user/blink-led
 #!/bin/sh

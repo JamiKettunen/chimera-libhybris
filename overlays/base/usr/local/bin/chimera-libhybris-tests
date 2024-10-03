@@ -68,6 +68,22 @@ cmd "getprop ro.vndk.version"
 echo
 
 
+system_device=$(getprop ro.build.product 2>/dev/null)
+case "$system_device" in
+halium*)
+    gsi="yes!"
+    green
+    ;;
+*)
+    gsi="no/unknown :/"
+    yellow
+    ;;
+esac
+echo "Using Halium Generic System Image (GSI): ${gsi}${NORMAL}"
+cmd "getprop ro.build.product" "$system_device"
+echo
+
+
 android_lsof="$(lsof /android 2>/dev/null)"
 [ "$android_lsof" ] && android_lsof_count=$(echo "$android_lsof" | wc -l | xargs) || android_lsof_count=0
 if [ "$android_lsof_count" -gt 0 ]; then

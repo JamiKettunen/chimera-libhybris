@@ -149,10 +149,10 @@ images past Android 11 having issues that need to be ironed out. You can setup s
 built from `lineage-20` (Android 13) trees regardless if you wish but they require running
 `waydroid show-full-ui` **twice**.
 ```sh
-sudo mkdir -p /etc/waydroid-extra/images
-images_url=https://sourceforge.net/projects/aleasto-lineageos/files/LineageOS%2020/waydroid_arm64
-doas wget $images_url/system.img/download -O /etc/waydroid-extra/images/system.img
-doas wget $images_url/vendor.img/download -O /etc/waydroid-extra/images/vendor.img
+images_url="https://sourceforge.net/projects/aleasto-lineageos/files/LineageOS%2020/waydroid_arm64"
+doas mkdir -p /etc/waydroid-extra/images
+doas wget "$images_url/system.img/download" -O /etc/waydroid-extra/images/system.img
+doas wget "$images_url/vendor.img/download" -O /etc/waydroid-extra/images/vendor.img
 doas waydroid init -f
 ```
 

@@ -117,6 +117,26 @@ Then you're free to run graphical clients via e.g. `WAYLAND_DISPLAY=wayland-0 kg
 To stop Wayfire you have to `pkill wayfire` as `^C` in the tty1 doesn't work
 
 
+## Waydroid
+Running Android (LineageOS) container on top of this all is also possible with a Wayland compositor up:
+```sh
+doas apk add waydroid
+doas waydroid init -s GAPPS
+waydroid show-full-ui
+```
+Do note that on Halium 12+ ports no official image vendor channels are available due to Waydroid
+images past Android 11 having issues that need to be ironed out. You can setup some older images
+built from `lineage-20` (Android 13) trees regardless if you wish but they require running
+`waydroid show-full-ui` **twice**.
+```sh
+sudo mkdir -p /etc/waydroid-extra/images
+images_url=https://sourceforge.net/projects/aleasto-lineageos/files/LineageOS%2020/waydroid_arm64
+doas wget $images_url/system.img/download -O /etc/waydroid-extra/images/system.img
+doas wget $images_url/vendor.img/download -O /etc/waydroid-extra/images/vendor.img
+doas waydroid init -f
+```
+
+
 ### See also
 - https://github.com/JamiKettunen/cports/tree/hybris (Chimera Linux integration packages)
 - https://gitlab.com/hybrisos/hybrisaports (postmarketOS libhybris pkgs before dropped)

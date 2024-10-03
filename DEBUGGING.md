@@ -26,6 +26,16 @@ For tearing it down `adb shell 'umount /root/proc /root/sys /root/dev /root /dat
 from host should do the trick
 
 
+## Inspect kernel panic logs
+If suspected and the device actually writes these the usual way they can be conveniently obtained
+via recovery mode (even without chroot):
+```
+mount pstore -t pstore /sys/fs/pstore
+cat /sys/fs/pstore/console-ramoops
+```
+On some older v3.x series kernels especially this may instead be doable via `cat /proc/last_kmsg`.
+
+
 ## Store logs on-disk
 Due to downstream kernels being pretty spammy which would constantly keep growing especially
 `/var/log/kern.log` the whole directory has `tmpfs` mounted on boot. Undo this from `chroot` as

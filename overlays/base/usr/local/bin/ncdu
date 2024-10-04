@@ -1,0 +1,3 @@
+#!/bin/sh
+# default to something sensible for our setup
+[ $# -eq 0 ] && exec /usr/bin/ncdu / --exclude-kernfs --exclude /android --exclude /userdata || exec /usr/bin/ncdu "$@"

@@ -1,6 +1,9 @@
 # https://apps.kde.org/kate temporary files
 .*.kate-swp
 
+# always applied local config overrides
+/config.local.sh
+
 # mkrootfs.sh artifacts
 /apk-cache
 /chimera-linux-*-ROOTFS-*-bootstrap.tar.gz

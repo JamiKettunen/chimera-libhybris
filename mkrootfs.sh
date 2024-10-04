@@ -5,6 +5,7 @@
 : "${WORKDIR:=/tmp/chimera-rootfs}" # /mnt
 : "${SUDO:=sudo}"
 : "${CPORTS:=$HOME/cports}"
+: "${CPORTS_PACKAGES_DIR:=packages}"
 : "${CHROOT_WRAPPER:=chimera-chroot}" # xchroot arch-chroot
 : "${APK_CACHE:=apk-cache}"
 : "${ARCH:=aarch64}"
@@ -184,10 +185,27 @@ for user in root hybris; do
 	cat "${pubkeys[@]}" | $SUDO tee -a "$ssh_dir/authorized_keys" >/dev/null
 done
 
-# deploy host cports public key for target device apk to avoid need for spamming --allow-untrusted
+# deploy host cports public key for target device apk to avoid need for spamming
+# "--allow-untrusted" as well as configuration to allow for overlays/*/deploy.sh
+# to "apk add <package>@hybris-cports"
 if [ -d "$CPORTS" ]; then
 	email="$(git -C "$CPORTS" config user.email)"
 	$SUDO cp "$CPORTS/etc/keys/$email-"*".rsa.pub" "$WORKDIR/etc/apk/keys"
+
+	$SUDO mkdir "$WORKDIR/hybris-cports-packages"
+	$SUDO mount --bind "$CPORTS/$CPORTS_PACKAGES_DIR" "$WORKDIR/hybris-cports-packages"
+	for entry in "$CPORTS/$CPORTS_PACKAGES_DIR"/*; do
+		[ -d "$entry" ] || continue # ignore "cbuild-aarch64.lock" etc files
+
+		entries="@hybris-cports /hybris-cports-packages/${entry##*/}"
+		if [ -d "$entry/debug" ]; then
+			entries+="
+@hybris-cports /hybris-cports-packages/${entry##*/}/debug"
+		fi
+		$SUDO tee -a "$WORKDIR/etc/apk/repositories.d/99-chimera-libhybris.list" >/dev/null <<EOF
+$entries
+EOF
+	done
 fi
 
 # apply overlay files on top of rootfs
@@ -205,14 +223,19 @@ for overlay in "${OVERLAYS[@]}"; do
 	fi
 done
 
+if [ -d "$CPORTS" ]; then
+	$SUDO umount "$WORKDIR/hybris-cports-packages"
+	# now that we no longer have host apks around convince the rootfs apk to
+	# stay happy with the @hybris-cports tagged custom packages in /etc/apk/world
+	while read -r host_apkindex; do
+		rootfs_apkindex="$WORKDIR/hybris-cports-packages/${host_apkindex#"$CPORTS/$CPORTS_PACKAGES_DIR/"}"
+		$SUDO mkdir -p "${rootfs_apkindex%/*}"
+		$SUDO cp "$host_apkindex" "$rootfs_apkindex"
+	done < <(find "$CPORTS/$CPORTS_PACKAGES_DIR/" -name 'APKINDEX*')
+fi
+
 $SUDO $CHROOT_WRAPPER "$WORKDIR" <<'EOC'
 set -ex
-
-# install custom packages
-if [ -d pkgs ]; then
-	apk add pkgs/*.apk
-	rm -rf pkgs
-fi
 
 # setup root & hybris users
 chsh -s /bin/bash

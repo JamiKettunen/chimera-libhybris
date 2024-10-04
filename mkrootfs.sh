@@ -1,17 +1,21 @@
 #!/bin/bash
-DATE="20240707"
-SIZE="4G"
-OUT_ROOTFS="/tmp/chimera-rootfs.img"
-WORKDIR="/tmp/chimera-rootfs" # /mnt
-SUDO="sudo"
-CPORTS="$HOME/cports"
-CHROOT_WRAPPER="chimera-chroot" # xchroot arch-chroot
-APK_CACHE="apk-cache"
-ARCH="aarch64"
-OVERLAYS=(
-	base # Most default file-based configuration shared across all devices
-	usbnet # RNDIS + internet over USB
-)
+: "${DATE:=20240707}"
+: "${SIZE:=2G}"
+: "${OUT_ROOTFS:=/tmp/chimera-rootfs.img}"
+: "${WORKDIR:=/tmp/chimera-rootfs}" # /mnt
+: "${SUDO:=sudo}"
+: "${CPORTS:=$HOME/cports}"
+: "${CHROOT_WRAPPER:=chimera-chroot}" # xchroot arch-chroot
+: "${APK_CACHE:=apk-cache}"
+: "${ARCH:=aarch64}"
+if [ -z "$OVERLAYS" ]; then
+	OVERLAYS=(
+		base # Most default file-based configuration shared across all devices
+		usbnet # RNDIS + internet over USB
+	)
+else
+	OVERLAYS=($OVERLAYS)
+fi
 
 if [ ! -f "$1" ]; then
 	cat <<EOF

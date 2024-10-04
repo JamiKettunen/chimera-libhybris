@@ -13,7 +13,7 @@ else
     PS1='\[\e[32m\]\u\[\e[0m\]@\[\e[35m\]\h\[\e[0m\]:\[\e[36m\]\W\[\e[0m\]\$ '
 fi
 
-complete -cf doas sudo time
+complete -cf doas sudo time strace
 
 export HISTCONTROL=ignoredups:erasedups \
 	HISTSIZE=10000 \

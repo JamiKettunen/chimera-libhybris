@@ -1,0 +1,3 @@
+# FIXME: Launching wireplumber kernel panics in mtk_i2s2_adc2_pcm_hw_params(): https://paste.c-net.org/ytsftyobtyof
+# Without it we can still at least launch waydroid even if stuff otherwise may be cooked :^)
+# Once fixed this file may be removed, test: run "wireplumber" as "hybris" user

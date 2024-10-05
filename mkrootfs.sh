@@ -3,11 +3,11 @@
 : "${SIZE:=2G}"
 : "${OUT_ROOTFS:=/tmp/chimera-rootfs.img}"
 : "${WORKDIR:=/tmp/chimera-rootfs}" # /mnt
-: "${SUDO:=sudo}"
+[ -z "${SUDO+x}" ] && SUDO="sudo"
 : "${CPORTS:=$HOME/cports}"
 : "${CPORTS_PACKAGES_DIR:=packages}"
 : "${CHROOT_WRAPPER:=chimera-chroot}" # xchroot arch-chroot
-: "${APK_CACHE:=apk-cache}"
+[ -z "${APK_CACHE+x}" ] && APK_CACHE="apk-cache"
 : "${ARCH:=aarch64}"
 [ -z ${PASSWD+x} ] && PASSWD="1234" # "" = only login via SSH pubkey (or on-device autologin)
 if [ -z "$OVERLAYS" ]; then

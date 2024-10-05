@@ -199,8 +199,7 @@ EOC
 # "--allow-untrusted" as well as configuration to allow for overlays/*/deploy.sh
 # to "apk add <package>@hybris-cports"
 if [ -d "$CPORTS" ]; then
-	email="$(git -C "$CPORTS" config user.email || echo "$USER")"
-	$SUDO cp "$CPORTS/etc/keys/$email-"*".rsa.pub" "$WORKDIR/etc/apk/keys"
+	$SUDO cp "$CPORTS/etc/keys/"*".rsa.pub" "$WORKDIR/etc/apk/keys"
 
 	$SUDO mkdir "$WORKDIR/hybris-cports-packages"
 	$SUDO mount --bind "$CPORTS/$CPORTS_PACKAGES_DIR" "$WORKDIR/hybris-cports-packages"

@@ -9,6 +9,7 @@
 : "${CHROOT_WRAPPER:=chimera-chroot}" # xchroot arch-chroot
 [ -z "${APK_CACHE+x}" ] && APK_CACHE="apk-cache"
 : "${ARCH:=aarch64}"
+: "${QEMU_USER_STATIC:=qemu-$ARCH-static}" # qemu-$ARCH; for cross-architecture rootfs builds
 [ -z ${PASSWD+x} ] && PASSWD="1234" # "" = only login via SSH pubkey (or on-device autologin)
 if [ -z "$OVERLAYS" ]; then
 	OVERLAYS=(
@@ -18,6 +19,23 @@ if [ -z "$OVERLAYS" ]; then
 else
 	OVERLAYS=($OVERLAYS)
 fi
+
+verify_host_cmd() {
+	local cmd="$1" cmd_value="${!1}"
+	[ -x "$(command -v "${cmd_value%% *}")" ] && return
+	local options="$2" error_msg="$3" cmd_opt cmd_error="$cmd_value|"
+	while read -r cmd_opt; do
+		if [ -x "$(command -v "${cmd_opt%% *}")" ]; then
+			eval "$cmd='$cmd_opt'"
+			echo "Substituting not found host executable $cmd_value for ${cmd_opt%% *}..."
+			return
+		fi
+		[[ "${cmd_error}" = *"${cmd_opt%% *}|"* ]] || cmd_error+="${cmd_opt%% *}|"
+	done < <(echo "${options//|/$'\n'}")
+	: "${error_msg:="No valid $cmd host executable found matching '${cmd_error::-1}'!"}"
+	echo "$error_msg"
+	exit 1
+}
 
 if [ ! -f "$1" ]; then
 	cat <<EOF
@@ -36,7 +54,6 @@ cd "$(readlink -f "$(dirname "$0")")" # dir of this script
 tarball="chimera-linux-$ARCH-ROOTFS-$DATE-bootstrap.tar.gz"
 url="https://repo.chimera-linux.org/live/$DATE/$tarball"
 host_arch=$(uname -m)
-qemu_bin=""
 
 set -x # log every executed command
 mountpoint -q "$WORKDIR" && $SUDO umount -R "$WORKDIR"
@@ -55,13 +72,10 @@ $SUDO mount "$OUT_ROOTFS" "$WORKDIR"
 $SUDO tar xfp "$tarball" -C "$WORKDIR"
 
 if [ "$host_arch" != "$ARCH" ]; then
-	qemu_bin="$(command -v qemu-$ARCH-static)"
-	[ -z "$qemu_bin" ] && qemu_bin="$(command -v qemu-$ARCH)"
-	if [ -z "$qemu_bin" ]; then
-		echo "ERROR: Missing proper binfmt + QEMU user setup for $ARCH (cmd:qemu-$ARCH{-static,})"
-		exit 1
-	fi
-	$SUDO cp "$qemu_bin" "$WORKDIR/usr/bin"
+	verify_host_cmd QEMU_USER_STATIC "qemu-$ARCH-static|qemu-$ARCH" \
+		"Missing binfmt + QEMU user setup for $ARCH (cmd:qemu-$ARCH{,-static})"
+	QEMU_USER_STATIC="$(command -v "$QEMU_USER_STATIC")"
+	$SUDO cp "$QEMU_USER_STATIC" "$WORKDIR/usr/bin"
 fi
 
 if [ "$APK_CACHE" ]; then
@@ -272,7 +286,7 @@ EOC
 	$SUDO umount "$WORKDIR/var/cache/apk"
 	$SUDO rmdir "$WORKDIR/var/cache/apk"
 fi
-[ "$qemu_bin" ] && $SUDO rm "$WORKDIR/usr/bin/${qemu_bin##*/}"
+[ "$host_arch" != "$ARCH" ] && $SUDO rm "$WORKDIR/usr/bin/${QEMU_USER_STATIC##*/}"
 $SUDO umount "$WORKDIR"
 
 e2fsck -fy "$OUT_ROOTFS"

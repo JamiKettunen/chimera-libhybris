@@ -28,7 +28,7 @@ cross-building on a foreign (non-Chimera Linux) x86_64 host:
 halium_version=12
 
 git clone https://github.com/JamiKettunen/cports -b hybris ~/cports
-pushd ~/cports
+cd ~/cports
 wget https://repo.chimera-linux.org/apk/apk-x86_64-3.0.0_pre6-r0.static -O apk
 chmod +x apk
 PATH=$PWD:$PATH
@@ -41,7 +41,7 @@ user/libgbinder
 main/dinit
 "
 for p in $pkgs; do ./cbuild pkg -a aarch64 ${p}; done
-popd
+cd -
 ```
 At this point before creating new rootfs images you should always force pull latest changes locally
 (or even afterward rebase the https://github.com/JamiKettunen/cports/tree/hybris clone on latest

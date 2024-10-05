@@ -115,7 +115,6 @@ tee -a /etc/doas.conf >/dev/null <<'EOF'
 # Give hybris user root access without requiring a password.
 permit nopass hybris
 EOF
-chmod 640 /etc/doas.conf
 
 # /tmp as tmpfs
 tee -a /etc/fstab >/dev/null <<'EOF'
@@ -253,6 +252,9 @@ $PASSWD
 $PASSWD
 EOP
 fi
+
+# harden perms (non-root cannot do anything)
+chmod 640 /etc/doas.conf
 EOC
 
 if [ "$APK_CACHE" ]; then

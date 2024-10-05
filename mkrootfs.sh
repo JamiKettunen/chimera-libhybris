@@ -21,6 +21,8 @@ if [ -z "$OVERLAYS" ]; then
 else
 	OVERLAYS=($OVERLAYS)
 fi
+set -e # exit on any error
+cd "$(readlink -f "$(dirname "$0")")" # dir of this script
 
 verify_host_cmd() {
 	local cmd="$1" cmd_value="${!1}"
@@ -49,9 +51,6 @@ EOF
 	exit 1
 fi
 . "$1"
-
-set -e # exit on any error
-cd "$(readlink -f "$(dirname "$0")")" # dir of this script
 [ -f config.local.sh ] && . config.local.sh
 
 [ "$SUDO" ] && verify_host_cmd SUDO "sudo|doas"

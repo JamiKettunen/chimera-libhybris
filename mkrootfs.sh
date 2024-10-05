@@ -9,6 +9,7 @@
 : "${CHROOT_WRAPPER:=chimera-chroot}" # xchroot arch-chroot
 : "${APK_CACHE:=apk-cache}"
 : "${ARCH:=aarch64}"
+[ -z ${PASSWD+x} ] && PASSWD="1234" # "" = only login via SSH pubkey (or on-device autologin)
 if [ -z "$OVERLAYS" ]; then
 	OVERLAYS=(
 		base # Most default file-based configuration shared across all devices
@@ -234,7 +235,7 @@ if [ -d "$CPORTS" ]; then
 	done < <(find "$CPORTS/$CPORTS_PACKAGES_DIR/" -name 'APKINDEX*')
 fi
 
-$SUDO $CHROOT_WRAPPER "$WORKDIR" <<'EOC'
+$SUDO $CHROOT_WRAPPER "$WORKDIR" <<EOC
 set -ex
 
 # setup root & hybris users
@@ -246,10 +247,12 @@ cp -r /etc/skel/. /home/hybris/
 chown -R hybris:hybris /home/hybris
 
 # set a default password for e.g. conspy
-passwd hybris <<'EOP'
-1234
-1234
+if [ "$PASSWD" ]; then
+	passwd hybris <<EOP
+$PASSWD
+$PASSWD
 EOP
+fi
 EOC
 
 if [ "$APK_CACHE" ]; then

@@ -17,6 +17,7 @@ if [ -z "$OVERLAYS" ]; then
 	OVERLAYS=(
 		base # Most default file-based configuration shared across all devices
 		usbnet # RNDIS + internet over USB
+		host-ssh-pubkey # Seamless SSH login to target device from build host
 	)
 else
 	OVERLAYS=($OVERLAYS)
@@ -193,16 +194,6 @@ ln -sr / /usr/aarch64-chimera-linux-musl
 # HACK: allow (close to) stock android kernel configs to boot without console=tty0 etc(?)
 #ln -s /usr/bin/init /init
 EOC
-
-# deploy host SSH public key for seamless login to target device
-pubkeys=($HOME/.ssh/id_rsa.pub)
-for user in root hybris; do
-	home_dir="/home/$user"
-	[ "$user" = "root" ] && home_dir="/root"
-	ssh_dir="${WORKDIR}${home_dir}/.ssh"
-	[ -e "$ssh_dir" ] || $SUDO mkdir -p "$ssh_dir"
-	cat "${pubkeys[@]}" | $SUDO tee -a "$ssh_dir/authorized_keys" >/dev/null
-done
 
 # deploy host cports public key for target device apk to avoid need for spamming
 # "--allow-untrusted" as well as configuration to allow for overlays/*/deploy.sh

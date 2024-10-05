@@ -20,6 +20,17 @@ Currently known booting ports include:
 - Maybe even your device...?
 
 
+## Host dependencies
+- `git` for cloning this repo and cports for package building
+  - https://github.com/chimera-linux/cports/blob/master/Usage.md#requirements also apply
+    - an `apk add base-cbuild-host` away on chimera systems
+- `bash` for [`mkrootfs.sh`](mkrootfs.sh)
+- `sudo` (or `doas`) for running specific commands as `root`
+- `wget` (or `fetch` / `curl`) for fetching base rootfs archive
+- e.g. `qemu-aarch64-static` (or `qemu-aarch64`) for cross-architecture rootfs building
+  - assuming binfmt configuration setup for qemu user as well
+
+
 ## Building some extra packages
 Before generating a rootfs image we need to build some required packages. Assuming you're
 cross-building on a foreign (non-Chimera Linux) x86_64 host:

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 : "${DATE:=20240707}"
 : "${SIZE:=2G}"
 : "${OUT_ROOTFS:=/tmp/chimera-rootfs.img}"

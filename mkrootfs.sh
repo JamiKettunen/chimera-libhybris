@@ -257,6 +257,11 @@ fi
 chmod 640 /etc/doas.conf
 EOC
 
+# Function which can potentially be defined in config files to run at this stage
+if type post_mkrootfs &>/dev/null; then
+	post_mkrootfs
+fi
+
 if [ "$APK_CACHE" ]; then
 	$SUDO $CHROOT_WRAPPER "$WORKDIR" <<'EOC'
 set -ex

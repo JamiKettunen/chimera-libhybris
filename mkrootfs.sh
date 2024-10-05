@@ -221,7 +221,7 @@ fi
 # apply overlay files on top of rootfs
 for overlay in "${OVERLAYS[@]}"; do
 	[ -d "overlays/$overlay" ] || continue
-	$SUDO cp -r "overlays/$overlay"/* "$WORKDIR"
+	$SUDO cp -R "overlays/$overlay"/* "$WORKDIR"
 	if [ -f "$WORKDIR/deploy-host.sh" ]; then
 		(. "$WORKDIR/deploy-host.sh")
 		$SUDO rm "$WORKDIR/deploy-host.sh"
@@ -249,10 +249,10 @@ set -ex
 
 # setup root & hybris users
 chsh -s /bin/bash
-cp -r /etc/skel/. /root/
+cp -R /etc/skel/. /root/
 useradd -m -G wheel,network,android_input -s /bin/bash -u 32011 hybris
 # TODO: no need for this if /home/hybris didn't exist before useradd
-cp -r /etc/skel/. /home/hybris/
+cp -R /etc/skel/. /home/hybris/
 chown -R hybris:hybris /home/hybris
 
 # set a default password for e.g. conspy

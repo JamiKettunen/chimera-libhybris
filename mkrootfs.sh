@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 : "${DATE:=20240707}"
+: "${FLAVOR:=bootstrap}" # full
 : "${SIZE:=2G}"
 : "${OUT_ROOTFS:=/tmp/chimera-rootfs.img}"
 : "${WORKDIR:=/tmp/chimera-rootfs}" # /mnt
-[ -z "${SUDO+x}" ] && SUDO="sudo"
+[ -z "${SUDO+x}" ] && SUDO="sudo" # doas
+: "${FETCH:=wget}" # fetch "curl -O"
 : "${CPORTS:=$HOME/cports}"
 : "${CPORTS_PACKAGES_DIR:=packages}"
 : "${CHROOT_WRAPPER:=chimera-chroot}" # xchroot arch-chroot
@@ -51,7 +53,11 @@ fi
 set -e # exit on any error
 cd "$(readlink -f "$(dirname "$0")")" # dir of this script
 [ -f config.local.sh ] && . config.local.sh
-tarball="chimera-linux-$ARCH-ROOTFS-$DATE-bootstrap.tar.gz"
+
+[ "$SUDO" ] && verify_host_cmd SUDO "sudo|doas"
+verify_host_cmd FETCH "wget|fetch|curl -O"
+
+tarball="chimera-linux-$ARCH-ROOTFS-$DATE-$FLAVOR.tar.gz"
 url="https://repo.chimera-linux.org/live/$DATE/$tarball"
 host_arch=$(uname -m)
 
@@ -68,7 +74,7 @@ mkfs.ext4 -b 4096 -O '^metadata_csum,^orphan_file' -m 0 -F "$OUT_ROOTFS"
 [ ! -d "$WORKDIR" ] && mkdir -p "$WORKDIR"
 $SUDO mount "$OUT_ROOTFS" "$WORKDIR"
 
-[ -f "$tarball" ] || wget "$url"
+[ ! -f "$tarball" ] && $FETCH "$url"
 $SUDO tar xfp "$tarball" -C "$WORKDIR"
 
 if [ "$host_arch" != "$ARCH" ]; then

@@ -10,28 +10,26 @@ red() { printf '%s' "$RED"; }
 green() { printf '%s' "$GREEN"; }
 yellow() { printf '%s' "$YELLOW"; }
 
+contains() { case "$2" in *"$1"*) true ;; *) false ;; esac; }
+starts_with() { case "$2" in "$1"*) true ;; *) false ;; esac; }
 cmd() {
   command="$1"
   output="$2"
   echo "${BOLD}# $command${NORMAL}"
   [ "$output" ] && echo "$output" || $command
 }
-
 dinit_status() {
     service=$1
     fancy_name="${2:-$service}"
     log="${3:-/var/log/$service.log}"
     status="$(dinitctl status $service)"
-    case "$status" in
-    *STARTED*)
+    if contains "STARTED" "$status"; then
         started="started ok!"
         green
-        ;;
-    *)
+    else
         started="not started :/"
         red
-        ;;
-    esac
+    fi
     echo "$fancy_name status: ${started}${NORMAL}"
     cmd "dinitctl status $service" "$status"
     cmd "cat $log"
@@ -65,24 +63,23 @@ else
 fi
 echo "libhybris getprop working: ${getprop_working}${NORMAL}"
 cmd "getprop ro.build.version.sdk"
-cmd "getprop ro.vndk.version"
+starts_with "yes" "$getprop_working" && cmd "getprop ro.vndk.version"
 echo
 
 
-system_device=$(getprop ro.build.product 2>/dev/null)
-case "$system_device" in
-halium*)
-    gsi="yes!"
-    green
-    ;;
-*)
-    gsi="no/unknown :/"
-    yellow
-    ;;
-esac
-echo "Using Halium Generic System Image (GSI): ${gsi}${NORMAL}"
-cmd "getprop ro.build.product" "$system_device"
-echo
+if starts_with "yes" "$getprop_working"; then
+    system_device=$(getprop ro.build.product 2>/dev/null)
+    if starts_with "halium" "$system_device"; then
+        gsi="yes!"
+        green
+    else
+        gsi="no/unknown :/"
+        yellow
+    fi
+    echo "Using Halium Generic System Image (GSI): ${gsi}${NORMAL}"
+    cmd "getprop ro.build.product" "$system_device"
+    echo
+fi
 
 
 android_lsof="$(lsof /android 2>/dev/null)"

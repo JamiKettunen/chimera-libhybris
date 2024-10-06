@@ -199,12 +199,19 @@ fi
 
 ## Testing the GPU
 Once `lxc-android` service is running well `test_egl_configs` should start returning interesting
-results. For some devices at this point you may also try `test_hwcomposer` (as root) but it may not
-work.
+results. For some devices at this point you may already get a graphical session up but if not try
+`test_hwcomposer` (as root) but it may not work. Remember to first `dinitctl stop greetd` if it's
+not yet disabled.
 
-Also try `export LD_PRELOAD=libtls-padding.so`
+While likely irrelevant `export HYBRIS_LD_DEBUG=1` could help dig up not found libraries (which we
+hide by default) most of which are non-fatal in practice as these are printed even on at least some
+fully working devices; once located under `/android` define define space separated `HYBRIS_LD_LIBRARY_PATH`
+env var with directory paths containing the supposedly missing library `.so` to see if this helps.
 
-You may also just try running a full Wayland compositor as documented in e.g. [Launching Wayfire](README.md#wayfire-wayland-compositor):
+Also try `export LD_PRELOAD=libtls-padding.so` (Halium 10 specifically known possibly affected)
+
+You may also just try running a full Wayland compositor as documented in e.g. [Launching Wayfire](README.md#wayfire-wayland-compositor)
+with the help of the env vars etc here via `conspy` if it didn't launch by default.
 
 NOTE: Some Halium 10/11 ports may need `dinitctl restart android-hwcomposer` after running some
 graphical client like `test_hwcomposer` or `wayfire`.

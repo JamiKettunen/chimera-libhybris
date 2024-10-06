@@ -201,7 +201,7 @@ enabled by default which should bring it up on the display but you may also laun
 doas dinitctl stop greetd
 doas conspy 1
 # login: hybris
-wayfire &> /tmp/wayfire.log
+HYBRIS_LD_DEBUG=1 wayfire &> /tmp/wayfire.log
 ```
 Then you're free to run graphical clients via e.g. `WAYLAND_DISPLAY=wayland-0 kgx` as `hybris` user.
 To stop Wayfire you have to `pkill wayfire` as `^C` in the tty1 doesn't work

@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-: "${DATE:=20240707}"
+: "${ARCH:=aarch64}" # everything else untested
+: "${DATE:=20240707}" # https://repo.chimera-linux.org/live/
 : "${FLAVOR:=bootstrap}" # full
-: "${SIZE:=2G}"
-: "${OUT_ROOTFS:=/tmp/chimera-rootfs.img}"
 : "${WORKDIR:=/tmp/chimera-rootfs}" # /mnt
-[ -z "${SUDO+x}" ] && SUDO="sudo" # doas
-: "${FETCH:=wget}" # fetch "curl -O"
+: "${OUT_ROOTFS:=/tmp/chimera-rootfs.img}"
+: "${SIZE:=2G}"
+[ -z "${APK_CACHE+x}" ] && APK_CACHE="apk-cache"
 : "${CPORTS:=$HOME/cports}"
 : "${CPORTS_PACKAGES_DIR:=packages}"
-: "${CHROOT_WRAPPER:=chimera-chroot}" # xchroot arch-chroot
-[ -z "${APK_CACHE+x}" ] && APK_CACHE="apk-cache"
-: "${ARCH:=aarch64}"
-: "${QEMU_USER_STATIC:=qemu-$ARCH-static}" # qemu-$ARCH; for cross-architecture rootfs builds
 [ -z ${PASSWD+x} ] && PASSWD="1234" # "" = only login via SSH pubkey (or on-device autologin)
+[ -z "${SUDO+x}" ] && SUDO="sudo" # doas
+: "${FETCH:=wget}" # fetch "curl -O"
+: "${QEMU_USER_STATIC:=qemu-$ARCH-static}" # qemu-$ARCH; for cross-architecture rootfs builds
+: "${CHROOT_WRAPPER:=chimera-chroot}" # xchroot arch-chroot
 if [ -z "$OVERLAYS" ]; then
 	OVERLAYS=(
 		base # Most default file-based configuration shared across all devices

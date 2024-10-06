@@ -37,6 +37,7 @@ dinit_status() {
     cmd "cat $log"
     echo
 }
+getprop() { timeout 0.2 /usr/bin/getprop "$@"; }
 
 
 echo
@@ -54,7 +55,7 @@ dinit_status android-mounts "Android mounts"
 dinit_status lxc-android "Halium LXC container"
 
 
-apilevel="getprop ro.build.version.sdk 2>/dev/null"
+apilevel=$(getprop ro.build.version.sdk 2>/dev/null)
 if [ "$apilevel" ]; then
     getprop_working="yes!"
     green

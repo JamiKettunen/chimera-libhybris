@@ -116,6 +116,7 @@ chroot_exec /bin/sh <<EOC
 set -ex
 
 # setup packages
+[ "$APK_CACHE" ] || apk add !apk-tools-cache
 apk add !apk-tools-interactive !mandoc-apropos
 apk upgrade -Ua
 
@@ -296,7 +297,12 @@ set -ex
 apk add !apk-tools-cache
 EOC
 	$SUDO umount "$WORKDIR/var/cache/apk"
-	$SUDO rmdir "$WORKDIR/var/cache/apk"
+	chroot_exec /bin/sh <<'EOC'
+set -ex
+
+# provide some default catalog of repos in case first booted without networking
+apk update
+EOC
 fi
 [ "$host_arch" != "$ARCH" ] && $SUDO rm "$WORKDIR/usr/bin/${QEMU_USER_STATIC##*/}"
 $SUDO umount "$WORKDIR"

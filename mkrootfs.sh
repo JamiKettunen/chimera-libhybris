@@ -32,7 +32,6 @@ verify_host_cmd() {
 	while read -r cmd_opt; do
 		if [ -x "$(command -v "${cmd_opt%% *}")" ]; then
 			eval "$cmd='$cmd_opt'"
-			echo "Substituting not found host executable $cmd_value for ${cmd_opt%% *}..."
 			return
 		fi
 		[[ "${cmd_error}" = *"${cmd_opt%% *}|"* ]] || cmd_error+="${cmd_opt%% *}|"

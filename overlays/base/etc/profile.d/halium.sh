@@ -27,5 +27,5 @@ and https://github.com/JamiKettunen/chimera-libhybris
 
 To conduct some tests for an initial port run \e[1mdoas chimera-libhybris-tests\e[0m
 
-Once you understand this you may hide most of this with \e[1mtouch /.chimera_hide_libhybris_notice\e[0m"
+Once you understand this you may hide most of this with \e[1mdoas touch /.chimera_hide_libhybris_notice\e[0m"
 fi

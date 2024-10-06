@@ -40,6 +40,8 @@ verify_host_cmd() {
 	echo "$error_msg"
 	exit 1
 }
+chroot_exec() { $SUDO $CHROOT_WRAPPER "$WORKDIR" "$@"; }
+chroot_exec_sh() { chroot_exec /bin/sh -c "$1"; }
 
 if [ ! -f "$1" ]; then
 	cat <<EOF
@@ -110,7 +112,7 @@ fi
 # fix networking with arch-chroot at least which doesn't do anything (bind-mount) otherwise
 $SUDO touch "$WORKDIR/etc/resolv.conf"
 
-$SUDO $CHROOT_WRAPPER "$WORKDIR" <<EOC
+chroot_exec /bin/sh <<EOC
 set -ex
 
 # setup packages
@@ -161,11 +163,8 @@ tee -a /etc/fstab >/dev/null <<'EOF'
 tmpfs /tmp tmpfs nosuid,nodev 0 0
 tmpfs /var/log tmpfs nosuid,nodev,noexec,size=2% 0 0
 EOF
-EOC
 
 # hacks mostly for downstream kernels and other scuffed configuration..
-$SUDO $CHROOT_WRAPPER "$WORKDIR" <<'EOC'
-set -ex
 
 # let's make a relative /data symlink instead of absolute one by default coming from Halium initrd :^)
 ln -sr /android/data /data
@@ -192,7 +191,7 @@ sed -i '' '/cgroup2/ s;$; || mount -t cgroup2 cgroup2 "/sys/fs/cgroup" || ./earl
 cat <<'EOF' > /usr/bin/preinit
 #!/bin/sh
 >/dinit.log
-exec /usr/bin/dinit "$@" --log-level debug --log-file /dinit.log
+exec /usr/bin/dinit "\$@" --log-level debug --log-file /dinit.log
 EOF
 chmod +x /usr/bin/preinit
 ln -sf preinit /usr/bin/init
@@ -245,7 +244,7 @@ for overlay in "${OVERLAYS[@]}"; do
 	fi
 	if [ -f "$WORKDIR/deploy.sh" ]; then
 		$SUDO chmod +x "$WORKDIR/deploy.sh"
-		$SUDO $CHROOT_WRAPPER "$WORKDIR" /deploy.sh
+		chroot_exec /deploy.sh
 		$SUDO rm "$WORKDIR/deploy.sh"
 	fi
 done
@@ -261,7 +260,7 @@ if [ -d "$CPORTS" ]; then
 	done < <(find "$CPORTS/$CPORTS_PACKAGES_DIR/" -name 'APKINDEX*')
 fi
 
-$SUDO $CHROOT_WRAPPER "$WORKDIR" <<EOC
+chroot_exec /bin/sh <<EOC
 set -ex
 
 # setup root & hybris users
@@ -290,7 +289,7 @@ if type post_mkrootfs &>/dev/null; then
 fi
 
 if [ "$APK_CACHE" ]; then
-	$SUDO $CHROOT_WRAPPER "$WORKDIR" <<'EOC'
+	chroot_exec /bin/sh <<'EOC'
 set -ex
 
 # don't keep "apk add"ed package .apks in /etc/apk/cache (/var/cache/apk) in final rootfs

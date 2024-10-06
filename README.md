@@ -52,6 +52,7 @@ user/libgbinder
 main/dinit
 "
 for p in $pkgs; do ./cbuild pkg -a aarch64 ${p}; done
+./cbuild prune-pkgs -a aarch64
 cd -
 ```
 At this point before creating new rootfs images you should always force pull latest changes locally

@@ -128,6 +128,28 @@ doas resize2fs /userdata/ubuntu.img
 ```
 
 
+## Updating and installing (hybris) cports packages
+```sh
+# for a one time thing it may make sense to not keep apk artifacts on rootfs if they fit in memory
+ssh root@10.15.19.82 mount tmpfs -t tmpfs /hybris-cports-packages
+
+# sync everything generally
+rsync -hvrPt packages/ root@10.15.19.82:/hybris-cports-packages
+# if you have multiple halium-gsi-* built locally instead and just want to copy e.g. halium-gsi-12*
+find packages/ -type f ! -name 'halium-gsi-*' -o -name 'halium-gsi-12*' | sed 's|packages/||' | \
+  rsync -hvrPt --files-from=- packages/ root@10.15.19.82:/hybris-cports-packages
+
+ssh root@10.15.19.82 apk upgrade -Ua
+# the same also works for additional built cports packages, just instead e.g.
+ssh root@10.15.19.82 apk add my-new-package@hybris-cports
+
+# if tmpfs on /hybris-cports-packages was used sync new APKINDEX* in place afterward to keep e.g.
+# "apk upgrade -a" happy
+ssh root@10.15.19.82 umount /hybris-cports-packages
+rsync -hvrPt --include='*/' --include='APKINDEX*' --exclude='*' packages/ root@10.15.19.82:/hybris-cports-packages
+```
+
+
 ### Wayfire (Wayland compositor)
 This is currently the only known working GPU rendering test you can do. Auto-login via `greetd` is
 enabled by default which should bring it up on the display but you may also launch it via `conspy`

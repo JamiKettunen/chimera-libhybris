@@ -54,7 +54,7 @@ bootlooping without success, so be sure to check for this file in rootfs after e
 manually!
 
 ## Getting debug logs out of dinit
-We need to create a `/usr/bin/init` wrappers script for debug logs from `chroot`:
+We can create a `/usr/bin/init` wrapper script for debug logs from `chroot` (done by default):
 ```sh
 cat <<'EOF' > /usr/bin/preinit
 #!/bin/sh

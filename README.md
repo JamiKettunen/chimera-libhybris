@@ -70,14 +70,12 @@ Using [`config.vidofnir.sh`](config.vidofnir.sh) as an example:
 ```sh
 ./mkrootfs.sh config.vidofnir.sh
 ```
-NOTE: By default assumes:
-1. `chimera-chroot` from https://github.com/chimera-linux/chimera-install-scripts to be available via e.g.
+If without `chimera-chroot`, `xchroot` or `arch-chroot` around already:
 ```sh
 git clone https://github.com/chimera-linux/chimera-install-scripts
 PATH=$PWD/chimera-install-scripts:$PATH
 ```
-2. e.g. `qemu-aarch64-static` is installed and its binfmt setup already done
-3. `sudo` is used, otherwise e.g. `echo 'SUDO=doas' > config.local.sh`
+Cross-architecture builds assume a working binfmt setup for static qemu-user binary for e.g. aarch64.
 
 Do note that performing package updates to `dinit-chimera` and `udev` WILL render the device
 unbootable until hacks from [`mkrootfs.sh`](mkrootfs.sh) to e.g. `/usr/lib/dinit.d/early/scripts/root-remount.sh`
@@ -148,8 +146,9 @@ adb shell 'chmod 644 /data/ubuntu.img && sync && reboot'
 
 
 ### Logging in (via USB)
-As your SSH public key (`~/.ssh/id_rsa.pub`) is copied onto the rootfs by default you should be able
-to log in as both `hybris` (default password: `1234`) and `root`.
+As your SSH public key (`~/.ssh/id_*.pub` or configured `SSH_PUBKEYS` file) is copied onto the rootfs
+by default you should be able to log in as both `hybris` (default password: `1234` or configured `PASSWD`)
+and `root`.
 ```sh
 ssh hybris@10.15.19.82
 # or

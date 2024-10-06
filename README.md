@@ -84,6 +84,50 @@ unbootable until hacks from [`mkrootfs.sh`](mkrootfs.sh) to e.g. `/usr/lib/dinit
 etc are reapplied manually before reboot!
 
 
+### Configuration
+Additional configuration is possible through device config files such as shown above,
+`config.local.sh` which may contain some user specific for yourself applied to every device or
+environment variables which are as follows (and *most* seen atop [`mkrootfs.sh`](mkrootfs.sh)):
+- `ARCH`: target rootfs architecture; while configurable only `aarch64` really makes sense or has
+  been tested so far. `armv7` will require a full from-source bootstrap since no binary packages are
+  officially provided by Chimera Linux (currently) and `x86_64` Androids are *very* rare.
+- `DATE`: https://repo.chimera-linux.org/live/ version to use for base rootfs tarballs
+- `FLAVOR`: from above version URL subdir the `-FLAVOR` archive to use; `bootstrap` and `full` are
+  the only sensible choices really
+- `WORKDIR`: mountpoint of rootfs image file during the creation process
+- `OUT_ROOTFS`: rootfs image file location, you may want to move it out of `/tmp`
+  default as needed
+- `SIZE`: `fallocate -l` size used to create the rootfs image file
+- `APK_CACHE`: apk package cache dir on host to use when running `apk` operations inside chroot to
+  speed up subsequent (re)builds; `apk-cache` (at chimera-libhybris clone toplevel) is default and
+  when value empty/unset nothing is cached
+- `CPORTS`: existing clone location of hybris cports; `cports` (at chimera-libhybris clone toplevel)
+  and `~/cports` as available are automatically supported defaults
+- `CPORTS_PACKAGES_DIR`: hybris cports local packages dir containing `user` etc; should always be
+  `packages` (relative to cports clone toplevel) unless using `./cbuild --repository-path ...`
+- `PASSWD`: password to set for non-root user, when set as empty value only login via SSH pubkey (or
+  on-device autologin); defaults to `1234`
+- `SUDO`: command prefix for elevating user privileges to root; `sudo` and `doas` as available are
+  automatically supported defaults (and when value empty/unset)
+- `FETCH`: command prefix for downloading files; `wget`, `fetch` and `curl -O` as available are
+  automatically supported defaults
+- `QEMU_USER_STATIC`: qemu-user static binary to use when creating a cross-architecture rootfs; e.g.
+  `qemu-aarch64-static` and `qemu-aarch64` as available are automatically supported defaults
+- `CHROOT_WRAPPER`: command prefix for running commands inside rootfs chroot; `chimera-chroot`,
+  `xchroot` and `arch-chroot` as available are automatically supported defaults
+- `OVERLAYS`: array of [`overlays`](overlays) to "dump" on top of the rootfs before non-root user creation which
+  may contain `deploy.sh` files to execute inside chroot or `deploy-host.sh` files sourced in the
+  context (variables et all) of `mkrootfs.sh`; defaults to `base usbnet host-ssh-pubkey` with device
+  configs typically appending more onto it
+
+
+#### Overlay specific configuration
+While most configuration affects the whole `mkrootfs.sh` there's some which only affect a specific
+enabled overlay's `deploy-host.sh` which can read variables defined via env/configuration:
+- `SSH_PUBKEYS`: SSH public keys to copy for both the non-root and root users in created rootfs;
+  defaults to `$HOME/.ssh/id_*.pub`
+
+
 ## Deploying and booting
 NOTE: We call the `rootfs.img` instead as `ubuntu.img` when using Halium initrd to make the cleanest
 possible mount hierarchy configuration on final rootfs without polluting it with double-mounts under

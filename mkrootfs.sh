@@ -284,6 +284,9 @@ fi
 
 # harden perms (non-root cannot do anything)
 chmod 640 /etc/doas.conf
+
+# leave some final disk usage info at the end
+df -h | grep '^Filesystem\|/$'
 EOC
 
 # Function which can potentially be defined in config files to run at this stage

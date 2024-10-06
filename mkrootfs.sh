@@ -55,6 +55,7 @@ fi
 
 [ "$SUDO" ] && verify_host_cmd SUDO "sudo|doas"
 verify_host_cmd FETCH "wget|fetch|curl -O"
+verify_host_cmd CHROOT_WRAPPER "chimera-chroot|xchroot|arch-chroot"
 
 [ -d "$CPORTS" ] || CPORTS="$HOME/cports"
 if [ ! -d "$CPORTS/user/libhybris" ]; then
@@ -105,6 +106,9 @@ if [ "$APK_CACHE" ]; then
 	$SUDO mkdir "$WORKDIR/var/cache/apk"
 	$SUDO mount --bind "$APK_CACHE" "$WORKDIR/var/cache/apk"
 fi
+
+# fix networking with arch-chroot at least which doesn't do anything (bind-mount) otherwise
+$SUDO touch "$WORKDIR/etc/resolv.conf"
 
 $SUDO $CHROOT_WRAPPER "$WORKDIR" <<EOC
 set -ex

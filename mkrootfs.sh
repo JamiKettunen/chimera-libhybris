@@ -20,6 +20,7 @@ if [ -z "$OVERLAYS" ]; then
 		host-ssh-pubkey # Seamless SSH login to target device from build host
 	)
 else
+	# shellcheck disable=SC2128,SC2206
 	OVERLAYS=($OVERLAYS)
 fi
 set -e # exit on any error
@@ -52,6 +53,7 @@ You must specify a config to use, for example:
 EOF
 	exit 1
 fi
+# shellcheck disable=SC1090
 . "$1"
 [ -f config.local.sh ] && . config.local.sh
 

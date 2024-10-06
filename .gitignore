@@ -1,6 +1,9 @@
 # https://apps.kde.org/kate temporary files
 .*.kate-swp
 
+# hybris cports
+/cports
+
 # always applied local config overrides
 /config.local.sh
 

@@ -6,7 +6,7 @@
 : "${OUT_ROOTFS:=/tmp/chimera-rootfs.img}"
 : "${SIZE:=2G}"
 [ -z "${APK_CACHE+x}" ] && APK_CACHE="apk-cache"
-: "${CPORTS:=$HOME/cports}"
+: "${CPORTS:=cports}" # ~/cports
 : "${CPORTS_PACKAGES_DIR:=packages}"
 [ -z ${PASSWD+x} ] && PASSWD="1234" # "" = only login via SSH pubkey (or on-device autologin)
 [ -z "${SUDO+x}" ] && SUDO="sudo" # doas
@@ -56,6 +56,23 @@ fi
 
 [ "$SUDO" ] && verify_host_cmd SUDO "sudo|doas"
 verify_host_cmd FETCH "wget|fetch|curl -O"
+
+[ -d "$CPORTS" ] || CPORTS="$HOME/cports"
+if [ ! -d "$CPORTS/user/libhybris" ]; then
+	cat <<EOF
+${CPORTS/$HOME/\~} isn't an https://github.com/JamiKettunen/cports/tree/hybris clone!
+You may configure CPORTS if it's already cloned elsewhere
+EOF
+	exit 1
+fi
+if ! compgen -G "$CPORTS/$CPORTS_PACKAGES_DIR/user/*/libhybris*.apk" >/dev/null; then
+	cat <<EOF
+${CPORTS/$HOME/\~}/$CPORTS_PACKAGES_DIR doesn't contain libhybris package build artifacts, consult
+README.md for mandatory extra package building steps before continuing! You may configure
+CPORTS_PACKAGES_DIR if you used ./cbuild --repository-path ...
+EOF
+	exit 1
+fi
 
 tarball="chimera-linux-$ARCH-ROOTFS-$DATE-$FLAVOR.tar.gz"
 url="https://repo.chimera-linux.org/live/$DATE/$tarball"
@@ -198,24 +215,22 @@ EOC
 # deploy host cports public key for target device apk to avoid need for spamming
 # "--allow-untrusted" as well as configuration to allow for overlays/*/deploy.sh
 # to "apk add <package>@hybris-cports"
-if [ -d "$CPORTS" ]; then
-	$SUDO cp "$CPORTS/etc/keys/"*".rsa.pub" "$WORKDIR/etc/apk/keys"
+$SUDO cp "$CPORTS/etc/keys/"*".rsa.pub" "$WORKDIR/etc/apk/keys"
 
-	$SUDO mkdir "$WORKDIR/hybris-cports-packages"
-	$SUDO mount --bind "$CPORTS/$CPORTS_PACKAGES_DIR" "$WORKDIR/hybris-cports-packages"
-	for entry in "$CPORTS/$CPORTS_PACKAGES_DIR"/*; do
-		[ -d "$entry" ] || continue # ignore "cbuild-aarch64.lock" etc files
+$SUDO mkdir "$WORKDIR/hybris-cports-packages"
+$SUDO mount --bind "$CPORTS/$CPORTS_PACKAGES_DIR" "$WORKDIR/hybris-cports-packages"
+for entry in "$CPORTS/$CPORTS_PACKAGES_DIR"/*; do
+	[ -d "$entry" ] || continue # ignore "cbuild-aarch64.lock" etc files
 
-		entries="@hybris-cports /hybris-cports-packages/${entry##*/}"
-		if [ -d "$entry/debug" ]; then
-			entries+="
+	entries="@hybris-cports /hybris-cports-packages/${entry##*/}"
+	if [ -d "$entry/debug" ]; then
+		entries+="
 @hybris-cports /hybris-cports-packages/${entry##*/}/debug"
-		fi
-		$SUDO tee -a "$WORKDIR/etc/apk/repositories.d/99-chimera-libhybris.list" >/dev/null <<EOF
+	fi
+	$SUDO tee -a "$WORKDIR/etc/apk/repositories.d/99-chimera-libhybris.list" >/dev/null <<EOF
 $entries
 EOF
-	done
-fi
+done
 
 # apply overlay files on top of rootfs
 for overlay in "${OVERLAYS[@]}"; do

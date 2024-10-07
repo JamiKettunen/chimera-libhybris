@@ -19,8 +19,12 @@ export HISTCONTROL=ignoredups:erasedups \
 	HISTSIZE=10000 \
 	HISTFILESIZE=10000
 
+# fix diff --color for SSH (unset otherwise)
+[ "$SSH_TTY" ] && export COLORTERM=truecolor
+
 alias \
 	ls='ls --color' \
+	diff='diff --color' \
 	sudo='doas' \
 	cat='cat -v'
 

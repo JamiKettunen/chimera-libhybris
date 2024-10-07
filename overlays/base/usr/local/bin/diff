@@ -1,3 +1,0 @@
-#!/bin/sh
-# --color=auto is broken for ssh
-[ -t 1 ] && exec /usr/bin/diff --color=always "$@" || exec /usr/bin/diff "$@"

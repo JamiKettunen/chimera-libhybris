@@ -83,15 +83,24 @@ ln -sf dinit /usr/bin/init
 
 
 ## Disabling potentially problematic services
-In chroot (see above `Chroot in` section) you can try the following in case your device is e.g.
-rebooting in a loop while trying to boot:
+In chroot (see above `Chroot in` section) you can try disabling each of the following one by one
+in case your device is e.g. rebooting in a loop while trying to boot:
 <!-- TODO: android-bluetooth -->
 ```sh
+# at first best to try just avoiding graphical/user stuff from launching
+dinitctl -o disable greetd
+
+# only useful for wlan really which can be dealt with later (keep in mind in some cases Wi-Fi may
+# be up and working before USB if you're unlucky... see README.md about wlan-nm-config overlay)
+dinitctl -o disable networkmanager
+
+# running Halium container shouldn't be mandatory for basic USB access (though this is sadly
+# changing and becoming the case on modern QCOM platforms at least unless worked around...)
 # alternatively "apk add !{lxc-android,halium-wrappers}-dinit-links"
 rm /usr/lib/dinit.d/boot.d/{android.target,android-hwcomposer}
-rm /etc/dinit.d/boot.d/greetd
 
-dinitctl -o disable networkmanager
+# while the last one will obviously disable USB access it may be the only way to confirm a kernel
+# panic due to ConfigFS USB gadget setup or similar (likely conflict with Android container init?)
 dinitctl -o disable usb-internet
 dinitctl -o disable usb-tethering
 ```

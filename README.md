@@ -81,7 +81,6 @@ Do note that performing package updates to `dinit-chimera` and `udev` WILL rende
 unbootable until hacks from [`mkrootfs.sh`](mkrootfs.sh) to e.g. `/usr/lib/dinit.d/early/scripts/root-remount.sh`
 etc are reapplied manually before reboot!
 
-
 ### Configuration
 Additional configuration is possible through device config files such as shown above,
 `config.local.sh` which may contain some user specific for yourself applied to every device or
@@ -118,12 +117,22 @@ environment variables which are as follows (and *most* seen atop [`mkrootfs.sh`]
   context (variables et all) of `mkrootfs.sh`; defaults to `base usbnet host-ssh-pubkey` with device
   configs typically appending more onto it
 
-
 #### Overlay specific configuration
 While most configuration affects the whole `mkrootfs.sh` there's some which only affect a specific
-enabled overlay's `deploy-host.sh` which can read variables defined via env/configuration:
+enabled overlay's `deploy-host.sh` which can read variables defined via env/configuration.
+
+##### host-ssh-pubkey
 - `SSH_PUBKEYS`: SSH public keys to copy for both the non-root and root users in created rootfs;
   defaults to `$HOME/.ssh/id_*.pub`
+
+##### wlan-nm-config
+- `WLAN_SSID`: Wi-Fi network SSID the device should connect to on boot once NetworkManager is up
+  (and kernel WLAN driver is initialized by Android container or chimera side as needed)
+- `WLAN_PASSWD`: The password to be used for connecting to said network
+If you wish to use a static configuration instead of DHCP and figuring out the lease given by the
+DHCP server (typically router):
+- `WLAN_GATEWAY`: Static IP address of the network gateway (router), e.g. `192.168.1.1`
+- `WLAN_ADDRESS`: Static IP address of the booting device in CIDR notation, e.g. `192.168.1.90/24`
 
 
 ## Deploying and booting

@@ -140,6 +140,9 @@ If it's not `dinitctl list` may give a clue as to what's going wrong (likely eit
 or `lxc-android` fails to start), consult their respective logs under `/var/log/` (enabling log
 storage on-disk as needed without USB access)
 
+Android `/init` itself will log to `dmesg`, `logcat` could be interesting too when the container is
+still running.
+
 See also `lxc-checkconfig` to ensure you're running the expected kernel config and that your changes
 are valid.
 

@@ -129,6 +129,7 @@ enabled overlay's `deploy-host.sh` which can read variables defined via env/conf
 - `WLAN_SSID`: Wi-Fi network SSID the device should connect to on boot once NetworkManager is up
   (and kernel WLAN driver is initialized by Android container or chimera side as needed)
 - `WLAN_PASSWD`: The password to be used for connecting to said network
+
 If you wish to use a static configuration instead of DHCP and figuring out the lease given by the
 DHCP server (typically router):
 - `WLAN_GATEWAY`: Static IP address of the network gateway (router), e.g. `192.168.1.1`

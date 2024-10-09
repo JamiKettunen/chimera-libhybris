@@ -3,6 +3,7 @@
 # do is setup USB networking and SSH, or just save some logs to rootfs for further
 # analysis from recovery mode
 YELLOW="$(printf '%b' '\033')[1;33m"
+BOLD="$(printf '%b' '\033')[1m"
 NORMAL="$(printf '%b' '\033')[0m"
 set -x
 exec > /dinit-panic.log 2>&1
@@ -27,7 +28,7 @@ cp /dinit.log /run/debug-motd
 cat <<EOF >> /run/debug-motd
 ${YELLOW}NOTICE: The current boot has failed and above is contents of /dinit.log; all of this was setup via
         /usr/bin/dinit-panic and you may find more logs of interest in /dinit-panic.log${NORMAL}
-	You may reboot (to recovery) via 'sync && reboot --system'
+	You may reboot (to recovery) via ${BOLD}sync && doas reboot --system${NORMAL}
 
 EOF
 mount --bind /run/debug-motd /etc/motd

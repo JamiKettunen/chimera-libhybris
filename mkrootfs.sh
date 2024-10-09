@@ -17,6 +17,7 @@ if [ -z "$OVERLAYS" ]; then
 	OVERLAYS=(
 		base # Most default file-based configuration shared across all devices
 		usbnet # RNDIS + internet over USB
+		host-timezone # Use build host timezone
 		host-ssh-pubkey # Seamless SSH login to target device from build host
 	)
 else
@@ -121,9 +122,6 @@ set -ex
 [ "$APK_CACHE" ] || apk add !apk-tools-cache
 apk add !apk-tools-interactive !mandoc-apropos
 apk upgrade -Ua
-
-# use build host timezone (TODO: on top with next images)
-ln -srf $(readlink -f /etc/localtime) /etc/localtime
 
 apk add chimera-repo-user
 apk add -t .base-minimal-custom-hybris base-full \

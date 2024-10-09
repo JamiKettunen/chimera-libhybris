@@ -116,12 +116,16 @@ environment variables which are as follows (and *most* seen atop [`mkrootfs.sh`]
   `xchroot` and `arch-chroot` as available are automatically supported defaults
 - `OVERLAYS`: array of [`overlays`](overlays) to "dump" on top of the rootfs before non-root user creation which
   may contain `deploy.sh` files to execute inside chroot or `deploy-host.sh` files sourced in the
-  context (variables et all) of `mkrootfs.sh`; defaults to `base usbnet host-ssh-pubkey` with device
-  configs typically appending more onto it
+  context (variables et all) of `mkrootfs.sh`; defaults to `base usbnet host-timezone host-ssh-pubkey`
+  with device configs typically appending more onto it
 
 #### Overlay specific configuration
 While most configuration affects the whole `mkrootfs.sh` there's some which only affect a specific
 enabled overlay's `deploy-host.sh` which can read variables defined via env/configuration.
+
+##### host-timezone
+- `TIMEZONE`: timezone to use in created rootfs, e.g. `Europe/Amsterdam`; defaults to host `/etc/localtime`
+  (symlink dereferenced)
 
 ##### host-ssh-pubkey
 - `SSH_PUBKEYS`: SSH public keys to copy for both the non-root and root users in created rootfs;

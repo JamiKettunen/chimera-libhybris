@@ -9,6 +9,7 @@
 : "${CPORTS:=cports}" # ~/cports
 : "${CPORTS_PACKAGES_DIR:=packages}"
 [ -z ${PASSWD+x} ] && PASSWD="1234" # "" = only login via SSH pubkey (or on-device autologin)
+[ -z ${APK_INTERACTIVE+x} ] && APK_INTERACTIVE="yes" # make empty to disable
 [ -z "${SUDO+x}" ] && SUDO="sudo" # doas
 : "${FETCH:=wget}" # fetch "curl -O"
 : "${QEMU_USER_STATIC:=qemu-$ARCH-static}" # qemu-$ARCH; for cross-architecture rootfs builds
@@ -298,15 +299,24 @@ fi
 
 # harden perms (non-root cannot do anything)
 chmod 640 /etc/doas.conf
-
-# leave some final disk usage info at the end
-df -h | grep '^Filesystem\|/$'
 EOC
 
 # Function which can potentially be defined in config files to run at this stage
 if type post_mkrootfs &>/dev/null; then
 	post_mkrootfs
 fi
+
+chroot_exec /bin/sh <<EOC
+set -ex
+
+# as user preference bring back apk interactive mode by default once all scripts done
+if [ "$APK_INTERACTIVE" ]; then
+	apk add apk-tools-interactive
+fi
+
+# leave some final disk usage info at the end
+df -h | grep '^Filesystem\|/$'
+EOC
 
 if [ "$APK_CACHE" ]; then
 	chroot_exec /bin/sh <<'EOC'

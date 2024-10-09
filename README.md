@@ -106,6 +106,9 @@ environment variables which are as follows (and *most* seen atop [`mkrootfs.sh`]
   `packages` (relative to cports clone toplevel) unless using `./cbuild --repository-path ...`
 - `PASSWD`: password to set for non-root user, when set as empty value only login via SSH pubkey (or
   on-device autologin); defaults to `1234`
+- `APK_INTERACTIVE`: enable `apk` interactive mode (prompt for Y/n before continuing operations) for
+  rootfs, disabled when set as empty value
+  on-device autologin); defaults to `yes`
 - `SUDO`: command prefix for elevating user privileges to root; `sudo` and `doas` as available are
   automatically supported defaults (and when value empty/unset)
 - `FETCH`: command prefix for downloading files; `wget`, `fetch` and `curl -O` as available are

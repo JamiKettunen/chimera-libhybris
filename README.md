@@ -37,6 +37,8 @@ cross-building on a foreign (non-Chimera Linux) x86_64 host:
 ```sh
 # NOTE: adjust target Halium version as needed
 halium_version=12
+# NOTE: uncomment/define the below ONLY if your device uses 32-bit Halium system image
+#halium_arm32=yes
 
 git clone https://github.com/JamiKettunen/cports -b hybris
 cd cports
@@ -47,7 +49,7 @@ PATH=$PWD:$PATH
 ./cbuild binary-bootstrap
 pkgs="
 user/wayfire-droidian
-user/halium-gsi-$halium_version.0
+user/halium-gsi-$halium_version.0${halium_arm32:+-arm32}
 user/libgbinder
 main/dinit
 "
@@ -134,6 +136,10 @@ If you wish to use a static configuration instead of DHCP and figuring out the l
 DHCP server (typically router):
 - `WLAN_GATEWAY`: Static IP address of the network gateway (router), e.g. `192.168.1.1`
 - `WLAN_ADDRESS`: Static IP address of the booting device in CIDR notation, e.g. `192.168.1.90/24`
+
+##### halium-{10,13}
+- `HALIUM_ARM32`: when set to any non-empty value instead of installing 64-bit e.g. `halium-gsi-10.0`
+  setup `halium-gsi-10.0-arm32` for devices running 64-bit Linux kernel/userspace but 32-bit Android
 
 
 ## Deploying and booting

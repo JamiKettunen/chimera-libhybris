@@ -177,18 +177,6 @@ touch /.writable_image
 # we only care about tty1 (if even that) for conspy -> GUI launch; used to apk add !base-full-console dmesg
 sed -i '' 's:ACTIVE_CONSOLES=.*:ACTIVE_CONSOLES="/dev/tty1":' /etc/default/console-setup
 
-# HACK: facilitate booting from rootfs.img loopback mounted from userdata
-sed -i '' 's/exec //; /dinit_early_root_remount/ s/$/ || :/' /usr/lib/dinit.d/early/scripts/root-remount.sh
-
-# HACK: facilitate booting on version <=v4.12 kernels, fixes:
-# - cgroup2: unknown option "nsdelegate"
-#   -> is this already a default mount option when running on modern kernels? drop always if so
-#   - cheeseburger/dumpling?: mount without the option
-# - mount: /sys/fs/cgroup: unknown filesystem type 'cgroup2'
-#   - yggdrasil: fallback mount legacy non-unified cgroup hierarchy
-#   - cgroups-v1.sh source: https://github.com/chimera-linux/dinit-chimera/commit/c43985d
-sed -i '' '/cgroup2/ s;$; || mount -t cgroup2 cgroup2 "/sys/fs/cgroup" || ./early/scripts/cgroups-v1.sh;' /usr/lib/dinit.d/early/scripts/cgroups.sh
-
 # HACK: verbose dinit logs into rootfs by default due to most likely no working VT
 cat <<'EOF' > /usr/bin/preinit
 #!/bin/sh
@@ -198,19 +186,11 @@ EOF
 chmod +x /usr/bin/preinit
 ln -sf preinit /usr/bin/init
 
-# HACK: avoid failing early-udev-trigger on every boot on Volla Phone X23
-# - "udevadm trigger --action=add" exits with code 1
-#   - X23: sc8551-standalone: Failed to write 'add' to '/sys/devices/platform/soc/11f00000.i2c/i2c-7/7-0066/power_supply/sc8551-standalone/uevent': Invalid argument
-sed -i '' 's!exec /usr/bin/udevadm trigger --action=add!/usr/bin/udevadm trigger --action=add; exit 0!' /usr/libexec/dinit-devd
-
 # CROSS HACK: workaround wlroots cannot find Xwayland binary "/usr/aarch64-chimera-linux-musl/usr/bin/Xwayland"
 # https://github.com/droidian/wlroots/blob/feature/next/upgrade-0-17-4/xwayland/server.c#L454
 ln -sr / /usr/aarch64-chimera-linux-musl
 
 
-
-# HACK: avoid getting stuck with downstream (as tested on OnePlus 5's v4.4) kernel
-#sed -i '' 's!exec /usr/bin/udevadm settle!/usr/bin/udevadm settle --timeout=3; exit 0!' /usr/libexec/dinit-devd
 
 # HACK: allow (close to) stock android kernel configs to boot without console=tty0 etc(?)
 #ln -s /usr/bin/init /init
@@ -225,7 +205,6 @@ $SUDO mkdir "$WORKDIR/hybris-cports-packages"
 $SUDO mount --bind "$CPORTS/$CPORTS_PACKAGES_DIR" "$WORKDIR/hybris-cports-packages"
 for entry in "$CPORTS/$CPORTS_PACKAGES_DIR"/*; do
 	[ -d "$entry" ] || continue # ignore "cbuild-aarch64.lock" etc files
-
 	entries="@hybris-cports /hybris-cports-packages/${entry##*/}"
 	if [ -d "$entry/debug" ]; then
 		entries+="
@@ -241,6 +220,7 @@ for overlay in "${OVERLAYS[@]}"; do
 	overlay_dir="$PWD/overlays/$overlay"
 	[ -d "$overlay_dir" ] || continue
 	$SUDO cp -R "$overlay_dir"/* "$WORKDIR"
+
 	while read -r overlay_symlink; do
 		[ -f "$overlay_symlink" ] || continue # ignore non-existing sources and directories
 		overlay_source="$(readlink -f "$overlay_symlink")"

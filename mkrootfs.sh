@@ -204,7 +204,7 @@ EOC
 # deploy host cports public key for target device apk to avoid need for spamming
 # "--allow-untrusted" as well as configuration to allow for overlays/*/deploy.sh
 # to "apk add <package>@hybris-cports"
-$SUDO cp "$CPORTS/etc/keys/"*".rsa.pub" "$WORKDIR/etc/apk/keys"
+$SUDO cp "$CPORTS/etc/keys/"*".pub" "$WORKDIR/etc/apk/keys"
 
 $SUDO mkdir "$WORKDIR/hybris-cports-packages"
 $SUDO mount --bind "$CPORTS/$CPORTS_PACKAGES_DIR" "$WORKDIR/hybris-cports-packages"

@@ -165,13 +165,6 @@ apk add \
   ncdu ripgrep strace llvm-binutils erofs-utils lsof vulkan-tools mesa-utils conspy bluez libinput evtest upower \
   gnome-console gsettings-desktop-schemas wtype wlr-randr wayland-utils
 
-# hybris as passwordless doas user
-tee -a /etc/doas.conf >/dev/null <<'EOF'
-
-# Give hybris user root access without requiring a password.
-permit nopass hybris
-EOF
-
 # /tmp as tmpfs
 tee -a /etc/fstab >/dev/null <<'EOF'
 tmpfs /tmp tmpfs nosuid,nodev 0 0
@@ -266,7 +259,9 @@ EOP
 fi
 
 # harden perms (non-root cannot do anything)
-chmod 640 /etc/doas.conf
+if [ -f /etc/doas.conf ]; then
+	chmod 640 /etc/doas.conf
+fi
 EOC
 
 # Function which can potentially be defined in config files to run at this stage

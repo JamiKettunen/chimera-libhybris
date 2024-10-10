@@ -117,6 +117,8 @@ environment variables which are as follows (and *most* seen atop [`mkrootfs.sh`]
   `qemu-aarch64-static` and `qemu-aarch64` as available are automatically supported defaults
 - `CHROOT_WRAPPER`: command prefix for running commands inside rootfs chroot; `chimera-chroot`,
   `xchroot` and `arch-chroot` as available are automatically supported defaults
+- `REPOS`: array of repositories to use; defaults to `https://repo.chimera-linux.org/current/main https://repo.chimera-linux.org/current/user`
+  by the means of default-installed `chimera-repo-main` and `apk add chimera-repo-user`
 - `OVERLAYS`: array of [`overlays`](overlays) to "dump" on top of the rootfs before non-root user creation which
   may contain `deploy.sh` files to execute inside chroot or `deploy-host.sh` files sourced in the
   context (variables et all) of `mkrootfs.sh`; defaults to `base usbnet host-timezone host-ssh-pubkey`

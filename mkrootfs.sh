@@ -14,6 +14,10 @@
 : "${FETCH:=wget}" # fetch "curl -O"
 : "${QEMU_USER_STATIC:=qemu-$ARCH-static}" # qemu-$ARCH; for cross-architecture rootfs builds
 : "${CHROOT_WRAPPER:=chimera-chroot}" # xchroot arch-chroot
+if [ "$REPOS" ]; then
+	# shellcheck disable=SC2128,SC2206
+	REPOS=($REPOS)
+fi
 if [ -z "$OVERLAYS" ]; then
 	OVERLAYS=(
 		base # Most default file-based configuration shared across all devices
@@ -121,15 +125,28 @@ fi
 # fix networking with arch-chroot at least which doesn't do anything (bind-mount) otherwise
 $SUDO touch "$WORKDIR/etc/resolv.conf"
 
+if [ ${#REPOS[@]} -gt 0 ]; then
+	$SUDO mkdir -p "$WORKDIR/etc/apk/repositories.d"
+	{ for r in "${REPOS[@]}"; do
+		echo "$r"
+	done } | $SUDO tee "$WORKDIR/etc/apk/repositories.d/00-chimera-libhybris-repos.list" >/dev/null
+	cat "$WORKDIR/etc/apk/repositories.d/00-chimera-libhybris-repos.list"
+fi
+
 chroot_exec /bin/sh <<EOC
 set -ex
 
 # setup packages
 [ "$APK_CACHE" ] || apk add !apk-tools-cache
 apk add !apk-tools-interactive !mandoc-apropos
+if [ ${#REPOS[@]} -gt 0 ]; then
+  # we want apk keys from chimera-repo-main around still
+  rm -f /etc/apk/repositories.d/*-repo-*.list
+else
+  apk add chimera-repo-user
+fi
 apk upgrade -Ua
 
-apk add chimera-repo-user
 apk add -t .base-minimal-custom-hybris base-full \
   !base-full-core base-bootstrap dinit-chimera procps turnstile \
   !base-full-firmware \

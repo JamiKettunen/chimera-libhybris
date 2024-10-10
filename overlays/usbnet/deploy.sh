@@ -1,2 +1,2 @@
 #!/bin/sh -ex
-apk add unudhcpd
+apk add iproute2 unudhcpd openssh

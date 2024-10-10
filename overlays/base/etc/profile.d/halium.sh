@@ -9,7 +9,7 @@ esac
 
 if [ ! -f /run/dinit/failed-boot ]; then
   # give at least a clear hint when the Halium container boot process could have problems
-  if [[ "$(dinitctl status android.target)" != *"STARTED"* ]]; then
+  if [ ! -f /run/dinit/completed-boot ]; then
     echo -e "\e[1;33mNOTICE: The system is still booting (android.target not reached)\e[0m\n"
   fi
   # prompt about running initial tests on first successful boot (not dinit-panic) and when not yet asked

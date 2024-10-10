@@ -58,6 +58,11 @@ fi
 # shellcheck disable=SC1090
 . "$1"
 [ -f config.local.sh ] && . config.local.sh
+if [ "$ARCH" = "aarch64" ] && [ "$HALIUM_ARM32" ] && [ -z "$HALIUM_ARM32_FORCE" ]; then
+	echo "32-bit Android with 64-bit Chimera Linux userspace is unsupported due to 64-bit libhybris being
+unable to link 32-bit Android libraries; set HALIUM_ARM32_FORCE to override this anyway and continue!"
+	exit 1
+fi
 
 [ "$SUDO" ] && verify_host_cmd SUDO "sudo|doas"
 verify_host_cmd FETCH "wget|fetch|curl -O"

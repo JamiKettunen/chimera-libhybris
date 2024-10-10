@@ -9,8 +9,8 @@ set -e
 # - technically e.g. "dinit_early_root_remount=rshared" could be added to kernel cmdline instead of this
 root_remount=/usr/lib/dinit.d/early/scripts/root-remount.sh
 if [ -f $root_remount ] && ! grep -q 'remount.*:$' $root_remount; then
-    echo "Hacking $root_remount (early-root-remount) to not fail on 'mount -o remount,ro /' with loopback rootfs..."
-    sed -i '' '/^exec / s:^:grep -q "^/dev/loop.* / " /proc/mounts || :' $root_remount
+    echo "Hacking $root_remount (early-root-remount) to not fail on 'mount -o remount,ro /'"
+    sed -i '' 's/^exec //; /^mount / s:^:grep -q "^/dev/loop.* / " /proc/mounts || :; /dinit_early_root_remount/ s/$/ || :/' $root_remount
 fi
 
 # HACK: facilitate booting on version <=v4.12 kernels without some cgroup v2 features fixing:

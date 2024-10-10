@@ -23,6 +23,7 @@ sshd -V
 ssh-keygen -A
 /usr/bin/sshd
 
+mkdir -p /run/dinit
 touch /etc/motd /run/dinit/failed-boot
 cp /dinit.log /run/debug-motd
 cat <<EOF >> /run/debug-motd

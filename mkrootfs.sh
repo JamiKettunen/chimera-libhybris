@@ -159,7 +159,7 @@ apk add -t .base-minimal-custom-hybris base-full \
   !base-full-net openssh \
   !base-full-sound
 apk add \
-  bash unudhcpd htop fastfetch neovim psmisc tree networkmanager \
+  bash htop fastfetch neovim psmisc tree networkmanager \
   ncdu ripgrep strace llvm-binutils erofs-utils lsof vulkan-tools mesa-utils conspy bluez libinput evtest upower \
   greetd xwayland hicolor-icon-theme fonts-cantarell-otf gnome-console gsettings-desktop-schemas wtype wlr-randr wayland-utils
 

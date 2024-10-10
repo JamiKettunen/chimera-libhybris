@@ -178,26 +178,6 @@ tmpfs /tmp tmpfs nosuid,nodev 0 0
 tmpfs /var/log tmpfs nosuid,nodev,noexec,size=2% 0 0
 EOF
 
-# hacks mostly for downstream kernels and other scuffed configuration..
-
-# let's make a relative /data symlink instead of absolute one by default coming from Halium initrd :^)
-ln -sr /android/data /data
-
-# get a read-write rootfs by default when using Halium initrd (without having to create this in userdata root otherwise)
-touch /.writable_image
-
-# we only care about tty1 (if even that) for conspy -> GUI launch; used to apk add !base-full-console dmesg
-sed -i '' 's:ACTIVE_CONSOLES=.*:ACTIVE_CONSOLES="/dev/tty1":' /etc/default/console-setup
-
-# HACK: verbose dinit logs into rootfs by default due to most likely no working VT
-cat <<'EOF' > /usr/bin/preinit
-#!/bin/sh
->/dinit.log
-exec /usr/bin/dinit "\$@" --log-level debug --log-file /dinit.log
-EOF
-chmod +x /usr/bin/preinit
-ln -sf preinit /usr/bin/init
-
 
 
 # HACK: allow (close to) stock android kernel configs to boot without console=tty0 etc(?)

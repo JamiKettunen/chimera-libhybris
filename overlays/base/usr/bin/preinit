@@ -1,0 +1,3 @@
+#!/bin/sh
+>/dinit.log
+exec /usr/bin/dinit "$@" --log-level debug --log-file /dinit.log

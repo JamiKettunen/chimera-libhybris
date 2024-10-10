@@ -22,6 +22,7 @@ if [ -z "$OVERLAYS" ]; then
 	OVERLAYS=(
 		base # Most default file-based configuration shared across all devices
 		usbnet # RNDIS + internet over USB
+		waydroid # For running Android apps
 		host-timezone # Use build host timezone
 		host-ssh-pubkey # Seamless SSH login to target device from build host
 	)
@@ -162,10 +163,6 @@ apk add \
   bash htop fastfetch neovim psmisc tree networkmanager \
   ncdu ripgrep strace llvm-binutils erofs-utils lsof vulkan-tools mesa-utils conspy bluez libinput evtest upower \
   greetd xwayland hicolor-icon-theme fonts-cantarell-otf gnome-console gsettings-desktop-schemas wtype wlr-randr wayland-utils
-
-# FIXME: while we need pulseaudio-modules-droid or a similar pipewire replacement for proper audio
-#        routing to internal speakers etc this is mandatory for waydroid to launch (:
-apk add pipewire iptables
 
 # auto-login (at least first time until wayfire crashes/is otherwise killed)
 tee -a /etc/greetd/config.toml >/dev/null <<'EOF'

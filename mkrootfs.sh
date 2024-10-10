@@ -22,6 +22,7 @@ if [ -z "$OVERLAYS" ]; then
 	OVERLAYS=(
 		base # Most default file-based configuration shared across all devices
 		usbnet # RNDIS + internet over USB
+		wayfire # Auto-login to a graphical Wayland environment
 		waydroid # For running Android apps
 		host-timezone # Use build host timezone
 		host-ssh-pubkey # Seamless SSH login to target device from build host
@@ -162,15 +163,7 @@ apk add -t .base-minimal-custom-hybris base-full \
 apk add \
   bash htop fastfetch neovim psmisc tree networkmanager \
   ncdu ripgrep strace llvm-binutils erofs-utils lsof vulkan-tools mesa-utils conspy bluez libinput evtest upower \
-  greetd xwayland hicolor-icon-theme fonts-cantarell-otf gnome-console gsettings-desktop-schemas wtype wlr-randr wayland-utils
-
-# auto-login (at least first time until wayfire crashes/is otherwise killed)
-tee -a /etc/greetd/config.toml >/dev/null <<'EOF'
-
-[initial_session]
-command = "wayfire"
-user = "hybris"
-EOF
+  gnome-console gsettings-desktop-schemas wtype wlr-randr wayland-utils
 
 # hybris as passwordless doas user
 tee -a /etc/doas.conf >/dev/null <<'EOF'
@@ -204,10 +197,6 @@ exec /usr/bin/dinit "\$@" --log-level debug --log-file /dinit.log
 EOF
 chmod +x /usr/bin/preinit
 ln -sf preinit /usr/bin/init
-
-# CROSS HACK: workaround wlroots cannot find Xwayland binary "/usr/aarch64-chimera-linux-musl/usr/bin/Xwayland"
-# https://github.com/droidian/wlroots/blob/feature/next/upgrade-0-17-4/xwayland/server.c#L454
-ln -sr / /usr/aarch64-chimera-linux-musl
 
 
 

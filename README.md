@@ -121,7 +121,7 @@ environment variables which are as follows (and *most* seen atop [`mkrootfs.sh`]
   by the means of default-installed `chimera-repo-main` and `apk add chimera-repo-user`
 - `OVERLAYS`: array of [`overlays`](overlays) to "dump" on top of the rootfs before non-root user creation which
   may contain `deploy.sh` files to execute inside chroot or `deploy-host.sh` files sourced in the
-  context (variables et all) of `mkrootfs.sh`; defaults to `base usbnet waydroid host-timezone host-ssh-pubkey`
+  context (variables et all) of `mkrootfs.sh`; defaults to `base usbnet wayfire waydroid host-timezone host-ssh-pubkey`
   with device configs typically appending more onto it
 
 #### Overlay specific configuration

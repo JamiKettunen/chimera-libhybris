@@ -215,7 +215,7 @@ for entry in "$CPORTS/$CPORTS_PACKAGES_DIR"/*; do
 		entries+="
 @hybris-cports /hybris-cports-packages/${entry##*/}/debug"
 	fi
-	$SUDO tee -a "$WORKDIR/etc/apk/repositories.d/99-chimera-libhybris.list" >/dev/null <<EOF
+	$SUDO tee -a "$WORKDIR/etc/apk/repositories.d/99-hybris-cports.list" >/dev/null <<EOF
 $entries
 EOF
 done

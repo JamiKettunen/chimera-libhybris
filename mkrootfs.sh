@@ -170,11 +170,6 @@ tee -a /etc/fstab >/dev/null <<'EOF'
 tmpfs /tmp tmpfs nosuid,nodev 0 0
 tmpfs /var/log tmpfs nosuid,nodev,noexec,size=2% 0 0
 EOF
-
-
-
-# HACK: allow (close to) stock android kernel configs to boot without console=tty0 etc(?)
-#ln -s /usr/bin/init /init
 EOC
 
 # deploy host cports public key for target device apk to avoid need for spamming

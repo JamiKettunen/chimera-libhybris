@@ -14,3 +14,6 @@ touch /.writable_image
 
 # HACK: init wrapper to get verbose dinit logs in rootfs /dinit.log by default (typically no functional VT framebuffer)
 ln -sf preinit /usr/bin/init # originally pointing to dinit
+
+# HACK: allow (close to) stock android kernel configs to boot without console=tty0 etc(?)
+#ln -s /usr/bin/init /init

@@ -41,7 +41,7 @@ Due to downstream kernels being pretty spammy which would constantly keep growin
 `/var/log/kern.log` the whole directory has `tmpfs` mounted on boot. Undo this from `chroot` as
 needed to get debug logs viewable in recovery
 ```sh
-sed -i '' '/log/d' /etc/fstab
+sed -i '' 's/^[^#]*log/#&/' /etc/fstab
 ```
 
 

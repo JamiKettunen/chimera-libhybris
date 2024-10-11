@@ -198,7 +198,7 @@ for overlay in "${OVERLAYS[@]}"; do
 	$SUDO cp -R "$overlay_dir"/* "$WORKDIR"
 
 	while read -r overlay_symlink; do
-		[ -f "$overlay_symlink" ] || continue # ignore non-existing sources and directories
+		[ -e "$overlay_symlink" ] || continue # ignore non-existing source files/dirs
 		overlay_source="$(readlink -f "$overlay_symlink")"
 		[[ "$overlay_source" = "$overlay_dir/"* ]] && continue # ignore relative symlinks only inside current overlay (rootfs)
 		[[ "$overlay_source" = "$PWD/overlays/"* ]] || continue # ignore host files outside other overlays
@@ -206,7 +206,7 @@ for overlay in "${OVERLAYS[@]}"; do
 ${overlay_source/$PWD\//}"
 		rootfs_symlink="${overlay_symlink/$overlay_dir/$WORKDIR}"
 		$SUDO rm "$rootfs_symlink"
-		$SUDO cp "$overlay_source" "$rootfs_symlink"
+		$SUDO cp -R "$overlay_source" "$rootfs_symlink"
 	done < <(find "$overlay_dir" -type l)
 
 	if [ -f "$WORKDIR/deploy-host.sh" ]; then

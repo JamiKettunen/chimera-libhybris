@@ -104,6 +104,7 @@ environment variables which are as follows (and *most* seen atop [`mkrootfs.sh`]
   and `~/cports` as available are automatically supported defaults
 - `CPORTS_PACKAGES_DIR`: hybris cports local packages dir containing `user` etc; should always be
   `packages` (relative to cports clone toplevel) unless using `./cbuild --repository-path ...`
+- `SHELL`: login shell to use for both the non-root and root users; defaults to `/bin/bash`
 - `PASSWD`: password to set for non-root user, when set as empty value only login via SSH pubkey (or
   on-device autologin); defaults to `1234`
 - `APK_INTERACTIVE`: enable `apk` interactive mode (prompt for Y/n before continuing operations) for

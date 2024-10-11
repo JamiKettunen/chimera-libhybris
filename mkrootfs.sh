@@ -237,13 +237,14 @@ set -ex
 
 # setup root & hybris users
 chsh -s $SHELL
-cp -R /etc/skel/. /root/
+[ -d /etc/skel ] && cp -R /etc/skel/. /root/
 [ -d /home/hybris ] && user_home_pre=1 || user_home_pre=0
 useradd -m -G wheel,network,android_input -s $SHELL -u 32011 hybris
-if [ "\$user_home_pre" -eq 1 ]; then
+if [ "\$user_home_pre" -eq 1 ] && [ -d /etc/skel ]; then
 	# useradd doesn't copy anything from skel directory if the home dir already exists
 	cp -R /etc/skel/. /home/hybris/
 fi
+rm -rf /etc/skel
 chown -R hybris:hybris /home/hybris
 
 # set a default password for e.g. conspy

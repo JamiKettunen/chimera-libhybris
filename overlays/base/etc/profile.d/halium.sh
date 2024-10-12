@@ -7,7 +7,7 @@ case $- in
   *) return ;;
 esac
 
-if [ ! -f /run/dinit/failed-boot ]; then
+if [ -d /run/dinit ] && [ ! -f /run/dinit/failed-boot ]; then
   # give at least a clear hint when the Halium container boot process could have problems
   if [ ! -f /run/dinit/completed-boot ]; then
     echo -e "\e[1;33mNOTICE: The system is still booting (android.target not reached)\e[0m\n"

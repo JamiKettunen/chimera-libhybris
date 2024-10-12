@@ -8,7 +8,7 @@
 [ -z "${APK_CACHE+x}" ] && APK_CACHE="apk-cache"
 : "${CPORTS:=cports}" # ~/cports
 : "${CPORTS_PACKAGES_DIR:=packages}"
-: "${SHELL:=/bin/bash}"
+: "${LOGIN_SHELL:=/bin/bash}"
 [ -z ${PASSWD+x} ] && PASSWD="1234" # "" = only login via SSH pubkey (or on-device autologin)
 [ -z ${APK_INTERACTIVE+x} ] && APK_INTERACTIVE="yes" # make empty to disable
 [ -z "${SUDO+x}" ] && SUDO="sudo" # doas
@@ -237,10 +237,10 @@ chroot_exec /bin/sh <<EOC
 set -ex
 
 # setup root & hybris users
-chsh -s $SHELL
+chsh -s $LOGIN_SHELL
 [ -d /etc/skel ] && cp -R /etc/skel/. /root/
 [ -d /home/hybris ] && user_home_pre=1 || user_home_pre=0
-useradd -m -G wheel,network,android_input -s $SHELL -u 32011 hybris
+useradd -m -G wheel,network,android_input -s $LOGIN_SHELL -u 32011 hybris
 if [ "\$user_home_pre" -eq 1 ] && [ -d /etc/skel ]; then
 	# useradd doesn't copy anything from skel directory if the home dir already exists
 	cp -R /etc/skel/. /home/hybris/
@@ -270,8 +270,8 @@ fi
 chroot_exec /bin/sh <<EOC
 set -ex
 
-if [ ! -x "$SHELL" ]; then
-	echo "Login shell missing; please install $SHELL or configure e.g. SHELL=/bin/sh!"
+if [ ! -x "$LOGIN_SHELL" ]; then
+	echo "Login shell missing; please install $LOGIN_SHELL or configure e.g. LOGIN_SHELL=/bin/sh!"
 	exit 1
 fi
 

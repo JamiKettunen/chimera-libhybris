@@ -6,7 +6,12 @@ if [ -z "$WLAN_SSID" ]; then
     exit 1
 fi
 
-nmconnection="$WORKDIR/etc/NetworkManager/system-connections/$WLAN_SSID.nmconnection"
+nmconnections="$WORKDIR/etc/NetworkManager/system-connections"
+if [ ! -d "$nmconnections" ]; then
+    chroot_exec_sh "apk add networkmanager"
+fi
+
+nmconnection="$nmconnections/$WLAN_SSID.nmconnection"
 $SUDO tee "$nmconnection" <<EOF >/dev/null
 [connection]
 id=$WLAN_SSID

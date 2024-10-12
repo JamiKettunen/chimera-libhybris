@@ -96,9 +96,21 @@ echo "Open files under /android: ${open_files}${NORMAL}"
 echo
 
 
+timeout 0.2 binder-list > /tmp/binder-list.log
+binder_list_count=$(wc -l /tmp/binder-list.log | awk '{print $1}')
+if [ "$binder_list_count" -gt 0 ]; then
+    binder_interfaces="yes (${binder_list_count})!"
+    green
+else
+    binder_interfaces="none :("
+    red
+fi
+echo "Binder IPC interfaces available: ${binder_interfaces} check /tmp/binder-list.log for output of 'binder-list'${NORMAL}"
+echo
+
+
 HYBRIS_LD_DEBUG=1 test_sensors > /tmp/sensors.log 2>&1
-sensors="$(test_sensors 2>/dev/null)"
-sensors_count=$(echo "$sensors" | grep -c ' Sensor ')
+sensors_count=$(grep -c ' Sensor ' /tmp/sensors.log)
 if [ "$sensors_count" -gt 0 ]; then
     sensors_available="yes (${sensors_count})!"
     green

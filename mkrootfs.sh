@@ -194,6 +194,7 @@ done
 
 # apply overlay files on top of rootfs
 for overlay in "${OVERLAYS[@]}"; do
+	[ "$overlay" ] || continue # ignore empty in case of simple array item removals
 	overlay_dir="$PWD/overlays/$overlay"
 	[ -d "$overlay_dir" ] || continue
 	$SUDO cp -R "$overlay_dir"/* "$WORKDIR"

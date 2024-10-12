@@ -96,7 +96,7 @@ environment variables which are as follows (and *most* seen atop [`mkrootfs.sh`]
 - `WORKDIR`: mountpoint of rootfs image file during the creation process
 - `OUT_ROOTFS`: rootfs image file location, you may want to move it out of `/tmp`
   default as needed
-- `SIZE`: `fallocate -l` size used to create the rootfs image file
+- `IMAGE_SIZE`: `fallocate -l` size used to create the rootfs image file
 - `APK_CACHE`: apk package cache dir on host to use when running `apk` operations inside chroot to
   speed up subsequent (re)builds; `apk-cache` (at chimera-libhybris clone toplevel) is default and
   when value empty/unset nothing is cached
@@ -183,7 +183,7 @@ ssh root@10.15.19.82
 
 
 ## Growing existing rootfs image size
-You may resize this file at will with the following if the preconfigured `SIZE` from [`mkrootfs.sh`](mkrootfs.sh)
+You may resize this file at will with the following if the preconfigured `IMAGE_SIZE` from [`mkrootfs.sh`](mkrootfs.sh)
 (or the loaded configurations files) isn't enough and your recovery environment has `resize2fs`:
 ```sh
 adb shell 'e2fsck -fy /data/ubuntu.img && resize2fs -f /data/ubuntu.img 8G'

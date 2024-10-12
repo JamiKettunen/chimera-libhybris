@@ -4,7 +4,7 @@
 : "${FLAVOR:=bootstrap}" # full
 : "${WORKDIR:=/tmp/chimera-rootfs}" # /mnt
 : "${OUT_ROOTFS:=/tmp/chimera-rootfs.img}"
-: "${SIZE:=2G}"
+: "${IMAGE_SIZE:=2G}"
 [ -z "${APK_CACHE+x}" ] && APK_CACHE="apk-cache"
 : "${CPORTS:=cports}" # ~/cports
 : "${CPORTS_PACKAGES_DIR:=packages}"
@@ -100,7 +100,7 @@ set -x # log every executed command
 mountpoint -q "$WORKDIR" && $SUDO umount -R "$WORKDIR"
 rm -f "$OUT_ROOTFS"
 
-fallocate -l $SIZE "$OUT_ROOTFS"
+fallocate -l "$IMAGE_SIZE" "$OUT_ROOTFS"
 # NOTE: features disabled that makes halium initrd & recoveries unhappy to work with the ext4 image files
 # FEATURE_C12 (orphan_file): https://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg1896675.html
 # The below works with Halium 9 recovery + e2fsck 1.42.9 (28-Dec-2013)

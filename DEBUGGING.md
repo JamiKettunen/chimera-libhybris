@@ -14,9 +14,7 @@ mkdir -p /root
 e2fsck -fy /data/ubuntu.img
 
 mount /data/ubuntu.img /root
-mount --bind /proc /root/proc
-mount --bind /sys /root/sys
-mount --bind /dev /root/dev
+for pseudofs in proc sys dev; do mount --bind /$pseudofs /root/$pseudofs; done
 env -i HOME=/root PS1='(chroot) \w \$ ' TERM=xterm-256color $(which chroot) /root /bin/bash -l
 ```
 For installing package files you can `adb push whatever.apk /root` and in chroot e.g.
@@ -52,6 +50,7 @@ in chroot, but you should continue to the section below.
 Note that on some devices it may not reboot automatically to recovery mode on failure but just keeps
 bootlooping without success, so be sure to check for this file in rootfs after entering recovery
 manually!
+
 
 ## Getting debug logs out of dinit
 We can create a `/usr/bin/init` wrapper script for debug logs from `chroot` (done by default):

@@ -39,6 +39,21 @@ getprop() { timeout 0.2 /usr/bin/getprop "$@"; }
 
 
 echo
+if grep -q cgroup2 /proc/filesystems; then
+    if grep -q 'cgroup2 /sys/fs/cgroup .*,nsdelegate' /proc/mounts; then
+        green
+        echo "Kernel control groups support: v2 with nsdelegate${NORMAL}"
+    else
+        yellow
+        echo "Kernel control groups support: v2 without nsdelegate${NORMAL}"
+    fi
+else
+    red
+    echo "Kernel control groups support: legacy v1${NORMAL}"
+fi
+echo
+
+
 dinit_pending="$(dinitctl list | grep -Ev '^\[(\{|\[)+')"
 [ "$dinit_pending" ] && dinit_pending_count=$(echo "$dinit_pending" | wc -l | xargs) || dinit_pending_count=0
 [ "$dinit_pending_count" -gt 0 ] && yellow || green

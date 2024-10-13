@@ -149,7 +149,8 @@ DHCP server (typically router):
 
 ##### halium-{10,13}
 - `HALIUM_ARM32`: when set to any non-empty value instead of installing 64-bit e.g. `halium-gsi-10.0`
-  setup `halium-gsi-10.0-arm32` for devices running 64-bit Linux kernel/userspace but 32-bit Android
+  setup `halium-gsi-10.0-arm32` for devices running 64-bit Linux kernel/userspace but 32-bit Android;
+  automatically set when `ARCH` is `armv7`
 
 
 ## Deploying and booting

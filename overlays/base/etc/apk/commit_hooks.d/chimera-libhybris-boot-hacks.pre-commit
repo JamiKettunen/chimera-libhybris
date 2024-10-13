@@ -1,6 +1,7 @@
 #!/bin/sh
 # Volatile critical boot hacks for chimera-libhybris systems
 # NOTE: ran BEFORE and AFTER for EVERY package altering apk command
+# shellcheck disable=SC2016
 set -e
 
 ## dinit-chimera
@@ -23,9 +24,20 @@ if [ -f $cgroups ] && ! grep -q 'cgroup2.*v1' $cgroups; then
     sed -i '' '/cgroup2/ s;$; || mount -t cgroup2 cgroup2 "/sys/fs/cgroup" || ./early/scripts/cgroups-v1.sh;' $cgroups
 fi
 
+# HACK: avoid failing boot with DINIT_EARLY_DEBUG set, https://github.com/chimera-linux/dinit-chimera/commit/9d919fc
+common=/usr/lib/dinit.d/early/scripts/common.sh
+if [ -f $common ] && grep -q 'DINIT_EARLY_DEBUG_SLOW.*sleep' $common && ! grep -q '^    return 0$' $common && \
+   ! grep -q 'if \[ -n "$DINIT_EARLY_DEBUG_SLOW" ]' $common; then
+    echo "Hacking $common (early-cgroups) to not fail when booting with DINIT_EARLY_DEBUG set..."
+    sed -i '' '/\[ -n "$DINIT_EARLY_DEBUG_SLOW" ] && sleep "$DINIT_EARLY_DEBUG_SLOW"/a\
+    return 0
+' $common
+fi
+
 ## udev
 
 # vidofnir FIXME: Failed to write 'add' to '/sys/devices/platform/soc/11f00000.i2c/i2c-7/7-0066/power_supply/sc8551-standalone/uevent': Invalid argument
+# eos FIXME: Failed to write 'add' to '/sys/devices/platform/soc/soc:google,battery/power_supply/battery/uevent': Resource temporarily unavailable
 devd=/usr/libexec/dinit-devd
 if [ -f $devd ] && grep -q 'trigger.*exec' $devd; then
     echo "Hacking $devd (early-udev-trigger) to not fail on 'udevadm trigger --action=add'..."

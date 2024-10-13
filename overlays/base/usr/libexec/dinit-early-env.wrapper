@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Prepare default dinit logging setup for chimera-libhybris
+set -e
+
+dinitctl --use-passed-cfd setenv "DINIT_EARLY_DEBUG=1"
+dinitctl --use-passed-cfd setenv "DINIT_EARLY_DEBUG_LOG=/dinit.log"
+
+exec ./early/scripts/env.sh "$@"

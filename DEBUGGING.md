@@ -63,15 +63,27 @@ EOF
 chmod +x /usr/bin/preinit
 ln -sf preinit /usr/bin/init
 ```
-Once failed boot (wait ~15 seconds and reboot forcefully) enter `chroot` again and `cat /dinit.log`
+To include every ran command from early scripts in the logs as well (as seen below) you can:
 ```
-(chroot) / # cat /dinit.log
+echo 'set -x' >> /usr/lib/dinit.d/early/scripts/common.sh
+```
+Similarly to include every ran command from `/etc/rc.local`:
+```
+sed -i '' '1a\
+set -x
+' /etc/rc.local
+```
+Assuming a failed boot without USB access either wait ~15 seconds and reboot forcefully, then enter
+`chroot` again and `cat /dinit.log`:
+```
 dinit: Starting system
 dinit: service early-env started.
+INIT: root-remount
++ exec mount -o remount,ro,rshared /
+mount: /: mount point is busy.
+       dmesg(1) may have more information after failed mount system call.
 dinit: Service early-root-remount command failed with exit code 32
 dinit: service early-root-remount failed to start.
-dinit: service early-tmpfiles-dev failed to start.
-dinit: service early-udevd failed to start.
 ...
 ```
 When done/issue fixed you may restore back the original init:

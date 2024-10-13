@@ -1,0 +1,6 @@
+# Set up dinit running environment
+# This is a /usr/lib/dinit.d/early-env override which improves logging for chimera-libhybris systems
+
+type     = scripted
+command  = /usr/libexec/dinit-early-env.wrapper
+options  = pass-cs-fd

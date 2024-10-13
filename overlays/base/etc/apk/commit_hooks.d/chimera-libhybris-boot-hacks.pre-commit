@@ -8,6 +8,7 @@ set -e
 
 # HACK: facilitate booting from userdata image loopback file mounted as rootfs, avoid failing on "mount: /: mount point is busy."
 # - technically e.g. "dinit_early_root_remount=rshared" could be added to kernel cmdline instead of this
+# expected default: exec mount -o remount,${dinit_early_root_remount:-ro,rshared} /
 root_remount=/usr/lib/dinit.d/early/scripts/root-remount.sh
 if [ -f $root_remount ] && ! grep -q 'remount.*:$' $root_remount; then
     echo "Hacking $root_remount (early-root-remount) to not fail on 'mount -o remount,ro /'"
@@ -18,13 +19,22 @@ fi
 # - cgroup2: unknown option "nsdelegate" -> mount without it (cheeseburger/dumpling v4.4?!)
 # - mount: /sys/fs/cgroup: unknown filesystem type 'cgroup2' -> fallback mount legacy v1 non-unified cgroup hierarchy (yggdrasil v4.4)
 # - maybe later patch older kernels since programs are also starting to deprecate support for cgroups v1...
+# expected default: ./early/helpers/mntpt "$CG_PATH" || mount -t cgroup2 -o nsdelegate cgroup2 "/sys/fs/cgroup"
 cgroups=/usr/lib/dinit.d/early/scripts/cgroups.sh
-if [ -f $cgroups ] && ! grep -q 'cgroup2.*v1' $cgroups; then
+if [ -f $cgroups ] && ! grep -q 'cgroups-v1.sh' $cgroups; then
     echo "Hacking $cgroups (early-cgroups) to not fail on 'mount -o nsdelegate -t cgroup2 cgroup2 /sys/fs/cgroup'..."
-    sed -i '' '/cgroup2/ s;$; || mount -t cgroup2 cgroup2 "/sys/fs/cgroup" || ./early/scripts/cgroups-v1.sh;' $cgroups
+    #sed -i '' '/cgroup2/ s;$; || mount -t cgroup2 cgroup2 "/sys/fs/cgroup" || ./early/scripts/cgroups-v1.sh;' $cgroups
+    sed -i '' '/cgroup2/ s:.*:if ! ./early/helpers/mntpt "$CG_PATH"; then\
+    if grep -q cgroup2 /proc/filesystems; then\
+        mount -t cgroup2 -o nsdelegate cgroup2 "/sys/fs/cgroup" || mount -t cgroup2 cgroup2 "/sys/fs/cgroup"\
+    else\
+        ./early/scripts/cgroups-v1.sh\
+    fi\
+fi:' $cgroups
 fi
 
 # HACK: avoid failing boot with DINIT_EARLY_DEBUG set, https://github.com/chimera-linux/dinit-chimera/commit/9d919fc
+# expected default (end of log_debug function): [ -n "$DINIT_EARLY_DEBUG_SLOW" ] && sleep "$DINIT_EARLY_DEBUG_SLOW"
 common=/usr/lib/dinit.d/early/scripts/common.sh
 if [ -f $common ] && grep -q 'DINIT_EARLY_DEBUG_SLOW.*sleep' $common && ! grep -q '^    return 0$' $common && \
    ! grep -q 'if \[ -n "$DINIT_EARLY_DEBUG_SLOW" ]' $common; then
@@ -36,8 +46,10 @@ fi
 
 ## udev
 
+# HACK: avoid boot failure on some devices where "udevadm trigger --action=add" always(?) fails
 # vidofnir FIXME: Failed to write 'add' to '/sys/devices/platform/soc/11f00000.i2c/i2c-7/7-0066/power_supply/sc8551-standalone/uevent': Invalid argument
 # eos FIXME: Failed to write 'add' to '/sys/devices/platform/soc/soc:google,battery/power_supply/battery/uevent': Resource temporarily unavailable
+# expected default: trigger) exec /usr/bin/udevadm trigger --action=add ;;
 devd=/usr/libexec/dinit-devd
 if [ -f $devd ] && grep -q 'trigger.*exec' $devd; then
     echo "Hacking $devd (early-udev-trigger) to not fail on 'udevadm trigger --action=add'..."
@@ -45,6 +57,7 @@ if [ -f $devd ] && grep -q 'trigger.*exec' $devd; then
 fi
 
 # cheeseburger/dumpling FIXME: avoid getting stuck for a while with downstream (as tested on OnePlus 5's v4.4) kernel
+# expected default: settle) exec /usr/bin/udevadm settle ;;
 #if [ -f $devd ] && grep -q 'settle.*exec' $devd; then
 #    sed -i '' 's!exec /usr/bin/udevadm settle!/usr/bin/udevadm settle --timeout=3; exit 0!' $devd
 #fi

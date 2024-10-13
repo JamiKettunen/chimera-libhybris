@@ -1,0 +1,28 @@
+#!/bin/sh
+set_hostname() {
+	[ -f /run/dinit/first-boot ] || return 0
+
+	[ -f /etc/default/hostname ] && hostname="$(cat /etc/default/hostname)"
+	if [ -z "${hostname}" ]; then
+		device="$(getprop ro.product.vendor.device | tr '[:upper:]' '[:lower:]')"
+		[ "${device}" ] && hostname="${device}"
+	fi
+	[ -z "${hostname}" ] && hostname="chimera"
+	echo "First boot, setting hostname to '${hostname}'..."
+	echo "${hostname}" > /etc/hostname
+}
+sync_timezone() {
+	WAITFORSERVICE_VALUE="true" waitforservice ro.persistent_properties.ready
+	host_tz="$(readlink -f /etc/localtime | sed 's:/usr/share/zoneinfo/::')"
+	android_tz="$(getprop persist.sys.timezone)"
+	if [ "$android_tz" != "$host_tz" ]; then
+		echo "Updating container timezone to '$host_tz'..."
+		setprop persist.sys.timezone "$host_tz"
+	fi
+}
+
+# Set hostname on initial boot
+set_hostname
+
+# Synchronize Android persist.sys.timezone with host /etc/localtime for proper logcat timestamps
+sync_timezone

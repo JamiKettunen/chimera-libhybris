@@ -108,7 +108,7 @@ dinitctl -o disable networkmanager
 # running Halium container shouldn't be mandatory for basic USB access (though this is sadly
 # changing and becoming the case on modern QCOM platforms at least unless worked around...)
 # alternatively "apk add !{lxc-android,halium-wrappers}-dinit-links"
-rm /usr/lib/dinit.d/boot.d/{android.target,android-hwcomposer}
+rm /usr/lib/dinit.d/boot.d/android.target
 
 # while the last one will obviously disable USB access it may be the only way to confirm a kernel
 # panic due to ConfigFS USB gadget setup or similar (likely conflict with Android container init?)
@@ -178,7 +178,7 @@ if it's crashing.
 Restarting the entire container while running is also possible if needed via
 `dinitctl restart --force lxc-android`. Do note that this may turn your display backlight entirely
 off and you'll have to manually e.g. `echo 255 > /sys/class/leds/lcd-backlight/brightness` afterward
-unless you create a [`android-hwcomposer-backlight` service](overlays/volla-vidofnir/etc/dinit.d/android-hwcomposer-backlight)
+unless you create a [`display-backlight` service](overlays/volla-vidofnir/usr/lib/dinit.d/display-backlight)
 
 
 ## View logs
@@ -236,8 +236,8 @@ Also try `export LD_PRELOAD=libtls-padding.so` (Halium 10 specifically known pos
 You may also just try running a full Wayland compositor as documented in e.g. [Launching Wayfire](README.md#wayfire-wayland-compositor)
 with the help of the env vars etc here via `conspy` if it didn't launch by default.
 
-NOTE: Some Halium 10/11 ports may need `dinitctl restart android-hwcomposer` after running some
-graphical client like `test_hwcomposer` or `wayfire`.
+NOTE: Some Halium 10/11 ports may need `dinitctl restart --force android-service@hwcomposer` after
+running some graphical client like `test_hwcomposer` or `wayfire`.
 
 Some QCOM devices set display brightness to 0 with hwcomposer start, so if there's still nothing on display try e.g.
 ```sh

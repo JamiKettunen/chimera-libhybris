@@ -1,4 +1,4 @@
 # TODO: also save/restore brightness on stop/start instead of maxing it out always?
 type = scripted
 command = /usr/bin/sh -c "echo 255 > /sys/class/leds/lcd-backlight/brightness"
-depends-on = android-hwcomposer
+depends-on = android-service@hwcomposer

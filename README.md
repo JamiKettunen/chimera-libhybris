@@ -171,7 +171,6 @@ adb push /tmp/chimera-rootfs.img /data/ubuntu.img
 adb shell 'chmod 644 /data/ubuntu.img && sync && reboot'
 ```
 
-
 ### Logging in (via USB)
 As your SSH public key (`~/.ssh/id_*.pub` or configured `SSH_PUBKEYS` file) is copied onto the rootfs
 by default you should be able to log in as both `hybris` (default password: `1234` or configured `PASSWD`)

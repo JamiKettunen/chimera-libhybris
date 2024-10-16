@@ -96,7 +96,6 @@ ln -sf dinit /usr/bin/init
 ## Disabling potentially problematic services
 In chroot (see above `Chroot in` section) you can try disabling each of the following one by one
 in case your device is e.g. rebooting in a loop while trying to boot:
-<!-- TODO: android-bluetooth -->
 ```sh
 # at first best to try just avoiding graphical/user stuff from launching
 ln -s /dev/null /etc/dinit.d/agetty
@@ -107,8 +106,7 @@ dinitctl -o disable networkmanager
 
 # running Halium container shouldn't be mandatory for basic USB access (though this is sadly
 # changing and becoming the case on modern QCOM platforms at least unless worked around...)
-# alternatively "apk add !{lxc-android,halium-wrappers}-dinit-links"
-rm /usr/lib/dinit.d/boot.d/android.target
+ln -s /dev/null /etc/dinit.d/lxc-android
 
 # while the last one will obviously disable USB access it may be the only way to confirm a kernel
 # panic due to ConfigFS USB gadget setup or similar (likely conflict with Android container init?)

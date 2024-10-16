@@ -147,6 +147,10 @@ DHCP server (typically router):
 - `WLAN_GATEWAY`: Static IP address of the network gateway (router), e.g. `192.168.1.1`
 - `WLAN_ADDRESS`: Static IP address of the booting device in CIDR notation, e.g. `192.168.1.90/24`
 
+##### usb-internet
+- `DNS`: Comma-separated servers to use for resolving DNS queries, e.g. `8.8.8.8,8.8.4.4`; defaults
+  to `1.1.1.1`
+
 ##### halium-{10,13}
 - `HALIUM_ARM32`: when set to any non-empty value instead of installing 64-bit e.g. `halium-gsi-10.0`
   setup `halium-gsi-10.0-arm32` for devices running 64-bit Linux kernel/userspace but 32-bit Android;

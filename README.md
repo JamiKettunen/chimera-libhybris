@@ -143,7 +143,7 @@ DHCP server (typically router):
 - `WLAN_GATEWAY`: Static IP address of the network gateway (router), e.g. `192.168.1.1`
 - `WLAN_ADDRESS`: Static IP address of the booting device in CIDR notation, e.g. `192.168.1.90/24`
 
-##### usb-internet
+##### wlan-nm-config & usb-internet
 - `DNS`: Comma-separated servers to use for resolving DNS queries, e.g. `8.8.8.8,8.8.4.4`; defaults
   to `1.1.1.1`
 

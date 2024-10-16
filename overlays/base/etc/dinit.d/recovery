@@ -1,0 +1,8 @@
+# This service is started if boot fails; unlike /usr/lib/dinit.d/recovery which
+# this overrides USB networking will be setup with SSH for a host to connect
+# and troubleshoot kinda like a "poor man's UART" :^)
+
+type = process
+command = /usr/local/bin/dinit-recovery
+restart = false
+options = pass-cs-fd

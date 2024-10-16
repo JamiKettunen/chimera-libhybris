@@ -9,6 +9,16 @@
 : "${CPORTS:=cports}" # ~/cports
 : "${CPORTS_PACKAGES_DIR:=packages}"
 : "${LOGIN_SHELL:=/bin/bash}"
+if [ -z "${EXTRA_GROUPS+x}" ]; then
+	EXTRA_GROUPS=(
+		wheel # doas(1)
+		network # configure NetworkManager
+		aid_input # r/w access to e.g. /dev/rfkill
+	)
+else
+	# shellcheck disable=SC2128,SC2206
+	EXTRA_GROUPS=($EXTRA_GROUPS)
+fi
 [ -z ${PASSWD+x} ] && PASSWD="1234" # "" = only login via SSH pubkey (or on-device autologin)
 [ -z ${APK_INTERACTIVE+x} ] && APK_INTERACTIVE="yes" # make empty to disable
 [ -z "${SUDO+x}" ] && SUDO="sudo" # doas
@@ -16,7 +26,7 @@
 : "${QEMU_USER_STATIC:=qemu-$ARCH-static}" # qemu-$ARCH; for cross-architecture rootfs builds
 : "${CHROOT_WRAPPER:=chimera-chroot}" # xchroot arch-chroot
 if [ "$REPOS" ]; then
-	# shellcheck disable=SC2128,SC2206
+	# shellcheck disable=SC2206
 	REPOS=($REPOS)
 fi
 if [ -z "$OVERLAYS" ]; then
@@ -240,7 +250,8 @@ set -ex
 chsh -s $LOGIN_SHELL
 [ -d /etc/skel ] && cp -R /etc/skel/. /root/
 [ -d /home/hybris ] && user_home_pre=1 || user_home_pre=0
-useradd -m -G wheel,network,android_input -s $LOGIN_SHELL -u 32011 hybris
+groups="$(echo "${EXTRA_GROUPS[*]}" | sed 's/ /,/g')"
+useradd -m \${groups:+-G \$groups} -s $LOGIN_SHELL -u 32011 hybris
 if [ "\$user_home_pre" -eq 1 ] && [ -d /etc/skel ]; then
 	# useradd doesn't copy anything from skel directory if the home dir already exists
 	cp -R /etc/skel/. /home/hybris/

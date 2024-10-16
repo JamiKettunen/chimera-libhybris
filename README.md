@@ -79,10 +79,6 @@ PATH=$PWD/chimera-install-scripts:$PATH
 ```
 Cross-architecture builds assume a working binfmt setup for static qemu-user binary for e.g. aarch64.
 
-Do note that performing package updates to `dinit-chimera` and `udev` WILL render the device
-unbootable until hacks from [`mkrootfs.sh`](mkrootfs.sh) to e.g. `/usr/lib/dinit.d/early/scripts/root-remount.sh`
-etc are reapplied manually before reboot!
-
 ### Configuration
 Additional configuration is possible through device config files such as shown above,
 `config.local.sh` which may contain some user specific for yourself applied to every device or

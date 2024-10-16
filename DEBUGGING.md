@@ -99,7 +99,7 @@ in case your device is e.g. rebooting in a loop while trying to boot:
 <!-- TODO: android-bluetooth -->
 ```sh
 # at first best to try just avoiding graphical/user stuff from launching
-dinitctl -o disable greetd
+ln -s /dev/null /etc/dinit.d/agetty
 
 # only useful for wlan really which can be dealt with later (keep in mind in some cases Wi-Fi may
 # be up and working before USB if you're unlucky... see README.md about wlan-nm-config overlay)
@@ -223,8 +223,8 @@ fi
 ## Testing the GPU
 Once `lxc-android` service is running well `test_egl_configs` should start returning interesting
 results. For some devices at this point you may already get a graphical session up but if not try
-`test_hwcomposer` (as root) but it may not work. Remember to first `dinitctl stop greetd` if it's
-not yet disabled.
+`test_hwcomposer` (as root) but it may not work. Remember to first `touch /run/no-wayfire; pkill wayfire`
+if `agetty` isn't disabled.
 
 While likely irrelevant `export HYBRIS_LD_DEBUG=1` could help dig up not found libraries (which we
 hide by default) most of which are non-fatal in practice as these are printed even on at least some

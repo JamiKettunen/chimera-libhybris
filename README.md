@@ -219,14 +219,16 @@ rsync -hvrPt --include='*/' --include='APKINDEX*' --exclude='*' packages/ root@1
 ```
 
 
-### Wayfire (Wayland compositor)
-This is currently the only known working GPU rendering test you can do. Auto-login via `greetd` is
-enabled by default which should bring it up on the display but you may also launch it via `conspy`
-(tty1) as described below after `dinitctl stop greetd` for further debugging as needed:
+## Wayfire (Wayland compositor)
+This is currently the only known working GPU rendering test you can do. Auto-login via `agetty-tty1`
+and `~/.bash_profile` is enabled (including logging to `/tmp/wayfire.log`) by default which should
+bring it up on the display but you may also launch it via `conspy` (tty1) as described below for
+further debugging as needed:
 ```sh
-doas dinitctl stop greetd
+doas touch /run/no-wayfire # prevent agetty-tty1 auto-login from re-launching wayfire
+pkill wayfire
+# NOTE: "doas dinitctl restart agetty-tty1" instead will break input on tty1
 doas conspy 1
-# login: hybris
 HYBRIS_LD_DEBUG=1 wayfire &> /tmp/wayfire.log
 ```
 Then you're free to run graphical clients via e.g. `WAYLAND_DISPLAY=wayland-0 kgx` as `hybris` user.

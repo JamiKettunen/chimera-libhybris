@@ -1,0 +1,10 @@
+GETTY_ARGS="$GETTY_ARGS --autologin hybris"
+
+# NOTE: while technically "depends-on = android-service@hwcomposer" in /etc/dinit.d/agetty-tty1
+# should be used this seems less fragile in the end with updates to the dinit services and whatnot;
+# either way we want hwcomposer around before trying to run wayfire etc.
+# TODO: also alternatively support DRM-only rendering on modern devices?
+dinitctl start android-service@hwcomposer || exit 1
+
+# make sure we also bring down agetty-tty1 in case of hwcomposer crashes or similar
+dinitctl add-dep need agetty-tty1 android-service@hwcomposer || exit 1

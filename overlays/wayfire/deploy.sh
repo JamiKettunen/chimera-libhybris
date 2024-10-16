@@ -1,13 +1,13 @@
 #!/bin/sh -ex
 apk add wayfire-droidian@hybris-cports \
-  greetd xwayland hicolor-icon-theme fonts-cantarell-otf
+  xwayland hicolor-icon-theme fonts-cantarell-otf
 
-# auto-login (at least first time until wayfire crashes/is otherwise killed)
-tee -a /etc/greetd/config.toml >/dev/null <<'EOF'
+# auto-login (android-service@hwcomposer dep in /etc/default/agetty-tty1)
+tee -a /etc/skel/.bash_profile >/dev/null <<'EOF'
 
-[initial_session]
-command = "wayfire"
-user = "hybris"
+if [ ! -e /run/no-wayfire ] && [ "$(tty)" = "/dev/tty1" ]; then
+    exec wayfire &> /tmp/wayfire.log
+fi
 EOF
 
 # CROSS HACK: workaround wlroots cannot find Xwayland binary "/usr/aarch64-chimera-linux-musl/usr/bin/Xwayland"

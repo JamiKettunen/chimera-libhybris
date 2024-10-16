@@ -1,3 +1,4 @@
 #!/bin/sh
 >/dinit.log
-exec /usr/bin/dinit "$@" --log-level debug --log-file /dinit.log
+rm -f /dinit-panic.log
+exec /usr/bin/dinit --auto-recovery --log-level debug --log-file /dinit.log "$@"

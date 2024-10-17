@@ -29,6 +29,31 @@ if [ "$REPOS" ]; then
 	# shellcheck disable=SC2206
 	REPOS=($REPOS)
 fi
+if [ -z "${PKGS+x}" ]; then
+	PKGS=(
+		base-full
+		"!base-full-core" procps turnstile # drop base-bootstrap/bsdtar/chimera-install-scripts/dinit-chimera
+		"!base-full-firmware" # device-specific firmware loaded by Android container from /vendor
+		"!base-full-fonts" # install proper fonts as needed for graphical UI overlay options
+		"!base-full-fs" e2fsprogs # only ext4 images supported (for now), TODO: fstrim timer?!
+		"!base-full-kernel" kmod # external kernel+initramfs, still want support for loadable modules
+		"!base-full-locale" # meh
+		"!base-full-misc" chrony file less lscpu syslog-ng opendoas # lessen misc stuff
+		"!base-full-net-tools" iproute2 iputils rfkill # drop ethtool/traceroute/iw
+		"!base-full-net" openssh # drop dhcpcd/iwd (networkmanager used)
+		"!base-full-sound" # TODO: pulseaudio-modules-droid etc
+		bash rsync
+		upower networkmanager bluez
+		libinput evtest
+		htop fastfetch neovim psmisc tree ncdu ripgrep
+		libgbinder-progs
+		strace llvm-binutils erofs-utils lsof
+		gnome-console gsettings-desktop-schemas wtype wlr-randr wayland-utils vulkan-tools mesa-utils conspy
+	)
+else
+	# shellcheck disable=SC2128,SC2206
+	PKGS=($PKGS)
+fi
 if [ -z "$OVERLAYS" ]; then
 	OVERLAYS=(
 		base # Most default file-based configuration shared across all devices
@@ -160,21 +185,11 @@ else
 fi
 apk upgrade -Ua
 
-apk add -t .base-minimal-custom-hybris base-full \
-  !base-full-core base-bootstrap dinit-chimera procps turnstile \
-  !base-full-firmware \
-  !base-full-fonts \
-  !base-full-fs e2fsprogs \
-  !base-full-kernel kmod \
-  !base-full-locale \
-  !base-full-misc chrony file less lscpu syslog-ng opendoas \
-  !base-full-net-tools iproute2 iputils rfkill \
-  !base-full-net openssh \
-  !base-full-sound
-apk add \
-  bash htop fastfetch neovim psmisc tree networkmanager \
-  ncdu ripgrep strace llvm-binutils erofs-utils lsof vulkan-tools mesa-utils conspy bluez libinput evtest upower \
-  gnome-console gsettings-desktop-schemas wtype wlr-randr wayland-utils
+# base-bootstrap - chimera-repo-main + dinit-chimera
+apk add -t .base-critical-hybris \
+  apk-tools chimerautils !base-cbuild dinit-chimera
+
+[ ${#PKGS[@]} -gt 0 ] && apk add ${PKGS[*]}
 
 # /tmp as tmpfs
 tee -a /etc/fstab >/dev/null <<'EOF'

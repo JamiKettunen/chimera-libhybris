@@ -50,8 +50,8 @@ PATH=$PWD:$PATH
 pkgs="
 user/wayfire-droidian
 user/halium-gsi-$halium_version.0${halium_arm32:+-arm32}
-user/libgbinder
 main/dinit
+main/nyagetty
 "
 for p in $pkgs; do ./cbuild pkg -a aarch64 ${p}; done
 ./cbuild prune-pkgs -a aarch64
@@ -117,7 +117,8 @@ environment variables which are as follows (and *most* seen atop [`mkrootfs.sh`]
 - `CHROOT_WRAPPER`: command prefix for running commands inside rootfs chroot; `chimera-chroot`,
   `xchroot` and `arch-chroot` as available are automatically supported defaults
 - `REPOS`: array of repositories to use; defaults to `https://repo.chimera-linux.org/current/main https://repo.chimera-linux.org/current/user`
-  by the means of default-installed `chimera-repo-main` and `apk add chimera-repo-user`
+  by the means of default `chimera-repo-main` and `apk add chimera-repo-user` with no `REPOS` set
+- `PKGS`: array of base packages to `apk add`; defaults to `bash rsync networkmanager ...` etc.
 - `OVERLAYS`: array of [`overlays`](overlays) to "dump" on top of the rootfs before non-root user creation which
   may contain `deploy.sh` files to execute inside chroot or `deploy-host.sh` files sourced in the
   context (variables et all) of `mkrootfs.sh`; defaults to `base usbnet wayfire waydroid host-timezone host-ssh-pubkey`

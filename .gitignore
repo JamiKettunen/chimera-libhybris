@@ -10,6 +10,3 @@
 # mkrootfs.sh artifacts
 /apk-cache
 /chimera-linux-*-ROOTFS-*.tar.gz
-
-# ~100M of kernel module binaries extracted from UT boot tarball
-/overlays/volla-vidofnir/usr/lib/modules

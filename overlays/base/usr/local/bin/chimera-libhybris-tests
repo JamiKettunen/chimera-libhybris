@@ -22,7 +22,7 @@ dinit_status() {
     service=$1
     fancy_name="${2:-$service}"
     log="${3:-/var/log/$service.log}"
-    status="$(dinitctl status $service)"
+    status="$(dinitctl status $service 2>/dev/null)"
     if contains "STARTED" "$status"; then
         started="started ok!"
         green
@@ -32,10 +32,8 @@ dinit_status() {
     fi
     echo "$fancy_name status: ${started}${NORMAL}"
     cmd "dinitctl status $service" "$status"
-    cmd "cat $log"
-    echo
+    [ "$log" != "/dev/null" ] && [ -f "$log" ] && cmd "cat $log"
 }
-getprop() { timeout 0.2 /usr/bin/getprop "$@"; }
 
 
 echo
@@ -63,12 +61,15 @@ echo
 
 
 dinit_status android-mounts "Android mounts"
+echo
 
 
 dinit_status lxc-android "Halium LXC container"
+echo
 
 
-apilevel=$(getprop ro.build.version.sdk 2>/dev/null)
+timeout 0.5 getprop ro.build.version.sdk >/tmp/apilevel 2>/dev/null
+apilevel=$(cat /tmp/apilevel)
 if [ "$apilevel" ]; then
     getprop_working="yes!"
     green
@@ -111,7 +112,7 @@ echo "Open files under /android: ${open_files}${NORMAL}"
 echo
 
 
-timeout 0.2 binder-list > /tmp/binder-list.log
+timeout 0.5 binder-list > /tmp/binder-list.log
 binder_list_count=$(wc -l /tmp/binder-list.log | awk '{print $1}')
 if [ "$binder_list_count" -gt 0 ]; then
     binder_interfaces="yes (${binder_list_count})!"
@@ -146,4 +147,23 @@ else
     red
 fi
 echo "EGL configs available: ${egl_configs} check /tmp/egl_configs.log for output of 'HYBRIS_LD_DEBUG=1 test_egl_configs'${NORMAL}"
+echo
+
+
+dinit_status bluebinder "Bluetooth hwbinder->VHCI bridge"
+cmd "rfkill list"
+dinit_status bluetoothd "BlueZ daemon" /dev/null
+timeout 0.5 bluetoothctl list > /tmp/bluetoothctl-list.log
+bluetoothctl_list_count=$(wc -l /tmp/bluetoothctl-list.log | awk '{print $1}')
+if [ "$bluetoothctl_list_count" -gt 0 ]; then
+    bt_controller_found="yes!"
+    green
+else
+    bt_controller_found="no :/ perhaps /var/log/bluetoothd.log may be of interest"
+    red
+fi
+echo "Bluetooth controller available: ${bt_controller_found}${NORMAL}"
+if starts_with "yes" "$bt_controller_found"; then
+    cmd "bluetoothctl list" "$(cat /tmp/bluetoothctl-list.log)"
+fi
 echo

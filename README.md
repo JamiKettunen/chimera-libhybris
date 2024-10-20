@@ -50,7 +50,6 @@ PATH=$PWD:$PATH
 pkgs="
 user/wayfire-droidian
 user/halium-gsi-$halium_version.0${halium_arm32:+-arm32}
-main/dinit
 main/nyagetty
 "
 for p in $pkgs; do ./cbuild pkg -a aarch64 ${p}; done

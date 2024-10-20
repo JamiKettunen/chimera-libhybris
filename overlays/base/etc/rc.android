@@ -2,7 +2,7 @@
 set_hostname() {
 	[ -f /run/dinit/first-boot ] || return 0
 
-	[ -f /etc/default/hostname ] && hostname="$(cat /etc/default/hostname)"
+	[ -f /etc/default/hostname ] && read -r hostname < /etc/default/hostname
 	if [ -z "${hostname}" ]; then
 		device="$(getprop ro.product.vendor.device | tr '[:upper:]' '[:lower:]')"
 		[ "${device}" ] && hostname="${device}"
@@ -20,9 +20,21 @@ sync_timezone() {
 		setprop persist.sys.timezone "$host_tz"
 	fi
 }
+set_bt_alias() {
+	[ -f /run/dinit/first-boot ] || return 0
+	[ -f /etc/default/pretty-hostname ] || return 0
+	[ -f /etc/dinit.d/boot.d/bluetoothd ] || return 0
+
+	read -r bt_alias < /etc/default/pretty-hostname
+	echo "First boot, setting Bluetooth alias to '${bt_alias}'..."
+	timeout 10 bluetoothctl system-alias "$bt_alias" || :
+}
 
 # Set hostname on initial boot
 set_hostname
 
 # Synchronize Android persist.sys.timezone with host /etc/localtime for proper logcat timestamps
 sync_timezone
+
+# Set Bluetooth alias to pretty hostname on initial boot
+set_bt_alias

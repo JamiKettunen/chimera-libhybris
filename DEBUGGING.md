@@ -44,7 +44,7 @@ sed -i '' 's/^[^#]*log/#&/' /etc/fstab
 
 
 ## Device reboots quickly and /dinit-panic.log exists
-This is created by [`/usr/bin/dinit-panic`](overlays/base/usr/bin/dinit-panic) which you may tweak
+This is created by [`/usr/local/bin/dinit-recovery`](overlays/base/usr/local/bin/dinit-recovery) which you may tweak
 in chroot, but you should continue to the section below.
 
 Note that on some devices it may not reboot automatically to recovery mode on failure but just keeps

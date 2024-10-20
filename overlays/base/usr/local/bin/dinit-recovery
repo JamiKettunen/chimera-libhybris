@@ -28,8 +28,8 @@ touch /etc/motd /run/dinit/failed-boot
 cp /dinit.log /run/debug-motd
 cat <<EOF >> /run/debug-motd
 ${YELLOW}NOTICE: The current boot has failed and above is contents of /dinit.log; all of this was setup via
-        /usr/bin/dinit-panic and you may find more logs of interest in /dinit-panic.log${NORMAL}
-	You may reboot (to recovery) via ${BOLD}sync && doas reboot --system${NORMAL}
+        /usr/local/bin/dinit-recovery and you may find more logs of interest in /dinit-panic.log${NORMAL}
+        You may reboot (to recovery) via ${BOLD}sync && doas reboot --system${NORMAL}
 
 EOF
 mount --bind /run/debug-motd /etc/motd

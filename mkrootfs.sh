@@ -49,6 +49,7 @@ if [ -z "${PKGS+x}" ]; then
 		libgbinder-progs
 		strace llvm-binutils erofs-utils lsof
 		gnome-console gsettings-desktop-schemas wtype wlr-randr wayland-utils vulkan-tools mesa-utils conspy
+		blueman
 	)
 else
 	# shellcheck disable=SC2128,SC2206

@@ -68,6 +68,6 @@ This may be needed for graphical programs (including full desktop environments) 
 ```sh
 wc -l $(find /system/ -name 'ueventd*.rc') $(find /vendor/ -name 'ueventd*.rc')
 cat $(find /system/ -name 'ueventd*.rc') $(find /vendor/ -name 'ueventd*.rc') | grep '^/dev' | sed 's:^/dev/::' \
-| awk '{printf "ACTION==\"add\", KERNEL==\"%s\", OWNER=\"android_%s\", GROUP=\"android_%s\", MODE=\"%s\"\n",$1,$3,$4,$2}' \
-| sed 's/android_root/root/g; s/\r//' > /etc/udev/rules.d/70-$(getprop ro.product.vendor.device).rules
+| awk '{printf "ACTION==\"add\", KERNEL==\"%s\", OWNER=\"aid_%s\", GROUP=\"aid_%s\", MODE=\"%s\"\n",$1,$3,$4,$2}' \
+| sed 's/aid_root/root/g; s/\r//' > /etc/udev/rules.d/70-$(getprop ro.product.vendor.device | tr '[:upper:]' '[:lower:]').rules
 ```

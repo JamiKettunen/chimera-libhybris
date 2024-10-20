@@ -71,3 +71,10 @@ cat $(find /system/ -name 'ueventd*.rc') $(find /vendor/ -name 'ueventd*.rc') | 
 | awk '{printf "ACTION==\"add\", KERNEL==\"%s\", OWNER=\"aid_%s\", GROUP=\"aid_%s\", MODE=\"%s\"\n",$1,$3,$4,$2}' \
 | sed 's/aid_root/root/g; s/\r//' > /etc/udev/rules.d/70-$(getprop ro.product.vendor.device | tr '[:upper:]' '[:lower:]').rules
 ```
+
+### Fine-tuning the rules
+In case running `rfkill list` as the non-root user fails with `rfkill: cannot open /dev/rfkill: Permission denied`
+add the following extra line to your udev rules:
+```ini
+ACTION=="add", KERNEL=="rfkill", OWNER="root", GROUP="root", MODE="0664"
+```

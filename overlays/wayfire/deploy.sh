@@ -6,7 +6,7 @@ apk add wayfire-droidian@hybris-cports \
 tee -a /etc/skel/.bash_profile >/dev/null <<'EOF'
 
 if [ ! -e /run/no-wayfire ] && [ "$(tty)" = "/dev/tty1" ]; then
-    exec wayfire &> /tmp/wayfire.log
+    exec wayfire &>> /tmp/wayfire.log
 fi
 EOF
 

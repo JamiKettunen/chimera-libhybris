@@ -3,7 +3,21 @@
 # Prepare default dinit logging setup for chimera-libhybris
 set -e
 
-dinitctl --use-passed-cfd setenv "DINIT_EARLY_DEBUG=1"
-dinitctl --use-passed-cfd setenv "DINIT_EARLY_DEBUG_LOG=/dinit.log"
+# NOTE: I think we're making some potentially wrong assumptions here like /proc and /run being ready
+# to use but somehow likely thanks to preparations from Halium initrd side they already work
+if grep -q ' /userdata ' /proc/mounts; then
+    # preferred path with Halium initrd
+    mkdir -p /userdata/chimera
+    dinit_log="/userdata/chimera/dinit.log"
+elif touch /dinit.log 2>/dev/null && [ -w /dinit.log ]; then
+    # this would be the case when /.writable_image exists or some other initramfs used instead
+    dinit_log="/dinit.log"
+fi
+if [ "$dinit_log" ]; then
+    mkdir -p /run/tmpfiles.d
+    echo "L+ /var/log/dinit.log - - - - ${dinit_log}" > /run/tmpfiles.d/dinit-log.conf
+    dinitctl --use-passed-cfd setenv "DINIT_EARLY_DEBUG=1"
+    dinitctl --use-passed-cfd setenv "DINIT_EARLY_DEBUG_LOG=$dinit_log"
+fi
 
 exec ./early/scripts/env.sh "$@"

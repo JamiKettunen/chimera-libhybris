@@ -44,38 +44,36 @@ sed -i '' 's/^[^#]*log/#&/' /etc/fstab
 ```
 
 
-## Device reboots quickly and /dinit-panic.log exists
-This is created by [`/usr/local/bin/dinit-recovery`](overlays/base/usr/local/bin/dinit-recovery) which you may tweak
-in chroot, but you should continue to the section below.
+## Device reboots quickly and dinit-panic.log exists
+In recovery (after `/data` mounted) this is created under `/data/chimera` by [`/usr/local/bin/dinit-recovery`](overlays/base/usr/local/bin/dinit-recovery)
+which you may tweak in chroot, but likely the more interesting stuff is in `/data/chimera/dinit.log`.
+When booting with a non- Halium initrd these both could either not exist or are stored directly on
+the rootfs itself (assuming it was left mounted rw from whatever initrd was used).
 
 Note that on some devices it may not reboot automatically to recovery mode on failure but just keeps
-bootlooping without success, so be sure to check for this file in rootfs after entering recovery
-manually!
+bootlooping without success, so be sure to check for these files in rootfs/userdata after entering
+recovery manually!
 
 
 ## Getting debug logs out of dinit
-We can create a `/usr/bin/init` wrapper script for debug logs from `chroot` (done by default):
+As per above you should already be getting log files either directly under userdata or the rootfs
+toplevel itself thanks to our [`/usr/bin/preinit`](overlays/base/usr/bin/preinit) wrapper called by the `init` -> `preinit` symlink.
+
+On a properly booted system there is a symlink to the used file in `/var/log/dinit.log`.
+
+To include every ran command from early scripts in the logs as well (as seen below) you can run the
+following from `chroot`:
 ```sh
-cat <<'EOF' > /usr/bin/preinit
-#!/bin/sh
->/dinit.log
-exec /usr/bin/dinit "$@" --log-level debug --log-file /dinit.log
-EOF
-chmod +x /usr/bin/preinit
-ln -sf preinit /usr/bin/init
-```
-To include every ran command from early scripts in the logs as well (as seen below) you can:
-```
 echo 'set -x' >> /usr/lib/dinit.d/early/scripts/common.sh
 ```
 Similarly to include every ran command from `/etc/rc.local`:
-```
+```sh
 sed -i '' '1a\
 set -x
 ' /etc/rc.local
 ```
-Assuming a failed boot without USB access either wait ~15 seconds and reboot forcefully, then enter
-`chroot` again and `cat /dinit.log`:
+Assuming a failed boot without USB access either wait ~15 seconds and reboot forcefully, then from
+recovery either `mount /data; cat /data/chimera/dinit.log` or enter `chroot` and `cat /dinit.log`:
 ```
 dinit: Starting system
 dinit: service early-env started.
@@ -86,11 +84,6 @@ mount: /: mount point is busy.
 dinit: Service early-root-remount command failed with exit code 32
 dinit: service early-root-remount failed to start.
 ...
-```
-When done/issue fixed you may restore back the original init:
-```sh
-rm /dinit.log
-ln -sf dinit /usr/bin/init
 ```
 
 

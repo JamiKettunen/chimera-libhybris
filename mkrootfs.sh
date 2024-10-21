@@ -48,8 +48,10 @@ if [ -z "${PKGS+x}" ]; then
 		htop fastfetch neovim psmisc tree ncdu ripgrep
 		libgbinder-progs
 		strace llvm-binutils erofs-utils lsof
-		gnome-console gsettings-desktop-schemas wtype wlr-randr wayland-utils vulkan-tools mesa-utils conspy
-		blueman
+		vulkan-tools mesa-utils conspy
+		wtype wayland-utils waypipe
+		wlr-randr
+		gnome-console gsettings-desktop-schemas blueman
 	)
 else
 	# shellcheck disable=SC2128,SC2206

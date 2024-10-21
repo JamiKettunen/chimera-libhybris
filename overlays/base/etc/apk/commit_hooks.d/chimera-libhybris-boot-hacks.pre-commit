@@ -6,15 +6,6 @@ set -e
 
 ## dinit-chimera
 
-# HACK: facilitate booting from userdata image loopback file mounted as rootfs, avoid failing on "mount: /: mount point is busy."
-# - technically e.g. "dinit_early_root_remount=rshared" could be added to kernel cmdline instead of this
-# expected default: exec mount -o remount,${dinit_early_root_remount:-ro,rshared} /
-root_remount=/usr/lib/dinit.d/early/scripts/root-remount.sh
-if [ -f $root_remount ] && ! grep -q 'remount.*:$' $root_remount; then
-    echo "Hacking $root_remount (early-root-remount) to not fail on 'mount -o remount,ro /'"
-    sed -i '' 's/^exec //; /^mount / s:^:grep -q "^/dev/loop.* / " /proc/mounts || :; /dinit_early_root_remount/ s/$/ || :/' $root_remount
-fi
-
 # HACK: facilitate booting on version <=v4.12 kernels without some cgroup v2 features fixing:
 # - cgroup2: unknown option "nsdelegate" -> mount without it (cheeseburger/dumpling v4.4?!)
 # - mount: /sys/fs/cgroup: unknown filesystem type 'cgroup2' -> fallback mount legacy v1 non-unified cgroup hierarchy (yggdrasil v4.4)

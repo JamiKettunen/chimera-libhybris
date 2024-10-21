@@ -1,4 +1,14 @@
 #!/bin/sh
->/dinit.log
-rm -f /dinit-panic.log
-exec /usr/bin/dinit --auto-recovery --log-level debug --log-file /dinit.log "$@"
+if grep -q ' /userdata ' /proc/mounts; then
+    # preferred path with Halium initrd
+    mkdir -p /userdata/chimera
+    dinit_log="/userdata/chimera/dinit.log"
+    dinit_panic_log="/userdata/chimera/dinit-panic.log"
+elif touch /dinit.log 2>/dev/null && [ -w /dinit.log ]; then
+    # this would be the case when /.writable_image exists or some other initramfs used instead
+    dinit_log="/dinit.log"
+    dinit_panic_log="/dinit-panic.log"
+fi
+[ "$dinit_log" ] && >"$dinit_log" # clear previous boot logs
+[ "$dinit_panic_log" ] && rm -f "$dinit_panic_log" # remove last panic log if any exist
+exec /usr/bin/dinit --auto-recovery --log-level debug ${dinit_log:+--log-file "$dinit_log"} "$@"

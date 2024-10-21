@@ -5,8 +5,21 @@
 YELLOW="$(printf '%b' '\033')[1;33m"
 BOLD="$(printf '%b' '\033')[1m"
 NORMAL="$(printf '%b' '\033')[0m"
+if grep -q ' /userdata ' /proc/mounts; then
+    # preferred path with Halium initrd
+    mkdir -p /userdata/chimera
+    dinit_panic_log="/userdata/chimera/dinit-panic.log"
+elif touch /dinit-panic.log 2>/dev/null && [ -w /dinit-panic.log ]; then
+    # this would be the case when /.writable_image exists or some other initramfs used instead
+    dinit_panic_log="/dinit-panic.log"
+else
+    # in-memory fallback in case nothing else is available...
+    dinit_panic_log="/run/dinit-panic.log"
+fi
 set -x
-exec > /dinit-panic.log 2>&1
+exec > "$dinit_panic_log" 2>&1
+# as there's a boot failure to fix read-write rootfs from this point onward only makes sense
+grep ' / .*ro' /proc/mounts && mount -o remount,rw /
 
 [ -x /etc/rc.panic ] && . /etc/rc.panic
 
@@ -25,10 +38,15 @@ ssh-keygen -A
 
 mkdir -p /run/dinit
 touch /etc/motd /run/dinit/failed-boot
-cp /dinit.log /run/debug-motd
+if grep -q ' /userdata ' /proc/mounts; then
+    dinit_log="/userdata/chimera/dinit.log"
+elif [ -f /dinit.log ]; then
+    dinit_log="/dinit.log"
+fi
+[ "$dinit_log" ] && cp "$dinit_log" /run/debug-motd
 cat <<EOF >> /run/debug-motd
-${YELLOW}NOTICE: The current boot has failed and above is contents of /dinit.log; all of this was setup via
-        /usr/local/bin/dinit-recovery and you may find more logs of interest in /dinit-panic.log${NORMAL}
+${YELLOW}NOTICE: The current boot has failed${dinit_log:+ and above is contents of ${dinit_log}}; all of this was setup via
+        /usr/local/bin/dinit-recovery and you may find more logs of interest in ${dinit_panic_log}${NORMAL}
         You may reboot (to recovery) via ${BOLD}sync && doas reboot --system${NORMAL}
 
 EOF

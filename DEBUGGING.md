@@ -18,7 +18,8 @@ for pseudofs in proc sys dev; do mount --bind /$pseudofs /root/$pseudofs; done
 env -i HOME=/root PS1='(chroot) \w \$ ' TERM=xterm-256color $(which chroot) /root /bin/bash -l
 ```
 For installing package files you can `adb push whatever.apk /root` and in chroot e.g.
-`apk --no-network add /*.apk && rm /*.apk`
+`apk --no-network add /*.apk && rm /*.apk`. Do note that this will wipe e.g. `@hybris-cports` tags
+for the newly installed packages which already exist in `/etc/apk/world`!
 
 For tearing it down `adb shell 'umount /root/proc /root/sys /root/dev /root /data; sync && reboot'`
 from host should do the trick
@@ -27,7 +28,7 @@ from host should do the trick
 ## Inspect kernel panic logs
 If suspected and the device actually writes these the usual way they can be conveniently obtained
 via recovery mode (even without chroot):
-```
+```sh
 mount pstore -t pstore /sys/fs/pstore
 cat /sys/fs/pstore/console-ramoops
 ```

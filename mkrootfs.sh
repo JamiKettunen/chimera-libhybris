@@ -72,6 +72,7 @@ else
 fi
 set -e # exit on any error
 cd "$(readlink -f "$(dirname "$0")")" # dir of this script
+readonly CONFIG="$1"
 
 verify_host_cmd() {
 	local cmd="$1" cmd_value="${!1}"
@@ -86,12 +87,15 @@ verify_host_cmd() {
 	done < <(echo "${options//|/$'\n'}")
 	: "${error_msg:="No valid $cmd host executable found matching '${cmd_error::-1}'!"}"
 	echo "$error_msg"
-	exit 1
+	return 1
 }
 chroot_exec() { $SUDO $CHROOT_WRAPPER "$WORKDIR" "$@"; }
 chroot_exec_sh() { chroot_exec /bin/sh -c "$1"; }
 
-if [ ! -f "$1" ]; then
+[ "$SUDO" ] && verify_host_cmd SUDO "sudo|doas"
+verify_host_cmd FETCH "wget|fetch|curl -O"
+
+if [ ! -f "$CONFIG" ]; then
 	cat <<EOF
 You must specify a config to use, for example:
 
@@ -101,7 +105,7 @@ EOF
 	exit 1
 fi
 # shellcheck disable=SC1090
-. "$1"
+. "$CONFIG"
 [ -f config.local.sh ] && . config.local.sh
 if [ "$ARCH" = "aarch64" ] && [ "$HALIUM_ARM32" ] && [ -z "$HALIUM_ARM32_FORCE" ]; then
 	echo "32-bit Android with 64-bit Chimera Linux userspace is unsupported due to 64-bit libhybris being
@@ -109,8 +113,6 @@ unable to link 32-bit Android libraries; set HALIUM_ARM32_FORCE to override this
 	exit 1
 fi
 
-[ "$SUDO" ] && verify_host_cmd SUDO "sudo|doas"
-verify_host_cmd FETCH "wget|fetch|curl -O"
 verify_host_cmd CHROOT_WRAPPER "chimera-chroot|xchroot|arch-chroot"
 
 [ -d "$CPORTS" ] || CPORTS="$HOME/cports"

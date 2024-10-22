@@ -156,11 +156,17 @@ DHCP server (typically router):
 
 
 ## Deploying and booting
-NOTE: We call the `rootfs.img` instead as `ubuntu.img` when using Halium initrd to make the cleanest
-possible mount hierarchy configuration on final rootfs without polluting it with double-mounts under
-`/android` etc.
-- place generated rootfs image as `ubuntu.img` on `userdata` root (unencrypted, ext4!)
-  - with device in e.g. UBports recovery (TWRP should work too minus `simg` steps), run on host:
+NOTE: We call the `rootfs.img` instead as `ubuntu.img` when using Halium initrd (and having
+`android-rootfs.img` inside rootfs) to make the cleanest possible mount hierarchy configuration on
+final rootfs without polluting it with double-mounts under `/android` etc.
+
+We do this by placing the generated rootfs image as `ubuntu.img` on `userdata` filesystem root. If
+it's not already unencrypted and `ext4` enter e.g. bootloader mode (or FastbootD as needed) and:
+```sh
+fastboot format:ext4 userdata reboot recovery
+```
+
+With device in e.g. UBports recovery (TWRP should work too potentially minus `xz` steps), run on host:
 ```sh
 adb shell 'mountpoint -q /data || mount /data'
 

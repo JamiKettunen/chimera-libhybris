@@ -170,11 +170,23 @@ $SUDO touch "$WORKDIR/etc/resolv.conf"
 
 if [ ${#REPOS[@]} -gt 0 ]; then
 	$SUDO mkdir -p "$WORKDIR/etc/apk/repositories.d"
-	{ for r in "${REPOS[@]}"; do
-		echo "$r"
-	done } | $SUDO tee "$WORKDIR/etc/apk/repositories.d/00-chimera-libhybris-repos.list" >/dev/null
-	cat "$WORKDIR/etc/apk/repositories.d/00-chimera-libhybris-repos.list"
+	repos_file="$WORKDIR/etc/apk/repositories.d/00-chimera-libhybris-repos.list"
+	for r in "${REPOS[@]}"; do
+		[[ -z "$repos_cports" && "$r" = "@hybris-cports "* ]] && repos_cports="yes"
+		[[ -z "$repos_local" && "$r" = *"10.15.19.100"* ]] && repos_local="yes"
+		echo "$r" | $SUDO tee -a "$repos_file" >/dev/null
+	done
+	if [ "$repos_local" ]; then
+		 sed 's/10.15.19.100/127.0.0.1/g' "$repos_file" | $SUDO tee "$repos_file.mkrootfs" >/dev/null
+		 $SUDO mount --bind "$repos_file.mkrootfs" "$repos_file"
+	fi
+	cat "$repos_file"
 fi
+
+# deploy host cports public key for target device apk to avoid need for spamming
+# "--allow-untrusted" as well as configuration to allow for overlays/*/deploy.sh
+# to "apk add <package>@hybris-cports"
+$SUDO cp "$CPORTS/etc/keys/"*".pub" "$WORKDIR/etc/apk/keys"
 
 chroot_exec /bin/sh <<EOC
 set -ex
@@ -203,24 +215,21 @@ tmpfs /var/log tmpfs nosuid,nodev,noexec,size=2% 0 0
 EOF
 EOC
 
-# deploy host cports public key for target device apk to avoid need for spamming
-# "--allow-untrusted" as well as configuration to allow for overlays/*/deploy.sh
-# to "apk add <package>@hybris-cports"
-$SUDO cp "$CPORTS/etc/keys/"*".pub" "$WORKDIR/etc/apk/keys"
-
-$SUDO mkdir "$WORKDIR/hybris-cports-packages"
-$SUDO mount --bind "$CPORTS/$CPORTS_PACKAGES_DIR" "$WORKDIR/hybris-cports-packages"
-for entry in "$CPORTS/$CPORTS_PACKAGES_DIR"/*; do
-	[ -d "$entry" ] || continue # ignore "cbuild-aarch64.lock" etc files
-	entries="@hybris-cports /hybris-cports-packages/${entry##*/}"
-	if [ -d "$entry/debug" ]; then
-		entries+="
+if [ -z "$repos_cports" ]; then
+	$SUDO mkdir "$WORKDIR/hybris-cports-packages"
+	$SUDO mount --bind "$CPORTS/$CPORTS_PACKAGES_DIR" "$WORKDIR/hybris-cports-packages"
+	for entry in "$CPORTS/$CPORTS_PACKAGES_DIR"/*; do
+		[ -d "$entry" ] || continue # ignore "cbuild-aarch64.lock" etc files
+		entries="@hybris-cports /hybris-cports-packages/${entry##*/}"
+		if [ -d "$entry/debug" ]; then
+			entries+="
 @hybris-cports /hybris-cports-packages/${entry##*/}/debug"
-	fi
-	$SUDO tee -a "$WORKDIR/etc/apk/repositories.d/99-hybris-cports.list" >/dev/null <<EOF
+		fi
+		$SUDO tee -a "$WORKDIR/etc/apk/repositories.d/99-hybris-cports.list" >/dev/null <<EOF
 $entries
 EOF
-done
+	done
+fi
 
 # apply overlay files on top of rootfs
 for overlay in "${OVERLAYS[@]}"; do
@@ -252,7 +261,7 @@ ${overlay_source/$PWD\//}"
 	fi
 done
 
-if [ -d "$CPORTS" ]; then
+if [ -d "$CPORTS" ] && [ -z "$repos_cports" ]; then
 	$SUDO umount "$WORKDIR/hybris-cports-packages"
 	# now that we no longer have host apks around convince the rootfs apk to
 	# stay happy with the @hybris-cports tagged custom packages in /etc/apk/world
@@ -329,6 +338,10 @@ set -ex
 # provide some default catalog of repos in case first booted without networking
 apk update
 EOC
+fi
+if [ "$repos_local" ]; then
+	$SUDO umount "$repos_file"
+	$SUDO rm "$repos_file.mkrootfs"
 fi
 [ "$host_arch" != "$ARCH" ] && $SUDO rm "$WORKDIR/usr/bin/${QEMU_USER_STATIC##*/}"
 $SUDO umount "$WORKDIR"

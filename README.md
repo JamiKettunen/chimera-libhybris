@@ -66,6 +66,59 @@ ccache = yes
 ```
 
 
+## Updating and installing (hybris) cports packages
+Once the packages are locally built you'll want to host your repo in some form, e.g. even something
+as simple as `python3 -m http.server -d packages/` and in `config.local.sh` configure them to be
+used for `mkrootfs.sh` as well as the booted system:
+```bash
+REPOS=(
+    "https://repo.chimera-linux.org/current/main"
+    "https://repo.chimera-linux.org/current/user"
+    "@hybris-cports http://10.15.19.100:8000/main"
+    "@hybris-cports http://10.15.19.100:8000/user"
+    # TODO: enable as you wish for lldb debug symbols etc
+    #"https://repo.chimera-linux.org/current/main/debug"
+    #"https://repo.chimera-linux.org/current/user/debug"
+    #"@hybris-cports http://10.15.19.100:8000/main/debug"
+    #"@hybris-cports http://10.15.19.100:8000/user/debug"
+)
+```
+**NOTE:** Replace `10.15.19.100` (host over USB networking) if repo access outside direct USB
+connection is desired! Otherwise consider running [`./tethering.sh`](tethering.sh) and perhaps check
+out or enable the [`usb-internet`](overlays/usb-internet) overlay for your rootfs builds.
+
+If needed you can transition a previous booted chimera libhybris rootfs over to using them too:
+```sh
+doas rm -r /hybris-cports-packages
+doas sed -i '' 's|/hybris-cports-packages|http://10.15.19.100:8000|g' /etc/apk/repositories.d/99-hybris-cports.list
+doas apk update
+```
+
+The worse but still fine working option if you prefer to not host the local package repository anyhow
+is to let `mkrootfs.sh` grab the packages directly from your configured `$CPORTS/$CPORTS_PACKAGES_DIR`
+and leave a `/hybris-cports-packages` dir with `APKINDEX`es around on rootfs to keep `apk` happy
+allowing you to upgrade packages later as needed with a workflow similar to below:
+```sh
+# for a one time thing it may make sense to not keep apk artifacts on rootfs if they fit in memory
+ssh root@10.15.19.82 mount tmpfs -t tmpfs /hybris-cports-packages
+
+# sync everything generally
+rsync -hvrPt packages/ root@10.15.19.82:/hybris-cports-packages
+# if you have multiple halium-gsi-* built locally instead and just want to copy e.g. halium-gsi-12*
+find packages/ -type f ! -name 'halium-gsi-*' -o -name 'halium-gsi-12*' | sed 's|packages/||' | \
+  rsync -hvrPt --files-from=- packages/ root@10.15.19.82:/hybris-cports-packages
+
+ssh root@10.15.19.82 apk upgrade -Ua
+# the same also works for additional built cports packages, just instead e.g.
+ssh root@10.15.19.82 apk add my-new-package@hybris-cports
+
+# if tmpfs on /hybris-cports-packages was used sync new APKINDEX* in place afterward to keep e.g.
+# "apk upgrade -a" happy
+ssh root@10.15.19.82 umount /hybris-cports-packages
+rsync -hvrPt --include='*/' --include='APKINDEX*' --exclude='*' packages/ root@10.15.19.82:/hybris-cports-packages
+```
+
+
 ## Generating /tmp/chimera-rootfs.img
 Using [`config.vidofnir.sh`](config.vidofnir.sh) as an example:
 ```sh
@@ -202,28 +255,6 @@ with rootfs unmounted to avoid corrupting the filesystem!
 doas resize2fs /userdata/ubuntu.img 8G
 doas reboot
 doas resize2fs /userdata/ubuntu.img
-```
-
-
-## Updating and installing (hybris) cports packages
-```sh
-# for a one time thing it may make sense to not keep apk artifacts on rootfs if they fit in memory
-ssh root@10.15.19.82 mount tmpfs -t tmpfs /hybris-cports-packages
-
-# sync everything generally
-rsync -hvrPt packages/ root@10.15.19.82:/hybris-cports-packages
-# if you have multiple halium-gsi-* built locally instead and just want to copy e.g. halium-gsi-12*
-find packages/ -type f ! -name 'halium-gsi-*' -o -name 'halium-gsi-12*' | sed 's|packages/||' | \
-  rsync -hvrPt --files-from=- packages/ root@10.15.19.82:/hybris-cports-packages
-
-ssh root@10.15.19.82 apk upgrade -Ua
-# the same also works for additional built cports packages, just instead e.g.
-ssh root@10.15.19.82 apk add my-new-package@hybris-cports
-
-# if tmpfs on /hybris-cports-packages was used sync new APKINDEX* in place afterward to keep e.g.
-# "apk upgrade -a" happy
-ssh root@10.15.19.82 umount /hybris-cports-packages
-rsync -hvrPt --include='*/' --include='APKINDEX*' --exclude='*' packages/ root@10.15.19.82:/hybris-cports-packages
 ```
 
 

@@ -91,6 +91,11 @@ verify_host_cmd() {
 }
 chroot_exec() { $SUDO $CHROOT_WRAPPER "$WORKDIR" "$@"; }
 chroot_exec_sh() { chroot_exec /bin/sh -c "$1"; }
+opt_run_func() {
+	if type $1 &>/dev/null; then
+		$1 # call function which can potentially be defined in config files to run at this stage
+	fi
+}
 
 [ "$SUDO" ] && verify_host_cmd SUDO "sudo|doas"
 verify_host_cmd FETCH "wget|fetch|curl -O"
@@ -250,6 +255,8 @@ ${overlay_source/$PWD\//}"
 		$SUDO cp -R "$overlay_source" "$rootfs_symlink"
 	done < <(find "$overlay_dir" -type l)
 
+	opt_run_func post_overlay_copy
+
 	if [ -f "$WORKDIR/deploy-host.sh" ]; then
 		(. "$WORKDIR/deploy-host.sh")
 		$SUDO rm "$WORKDIR/deploy-host.sh"
@@ -302,10 +309,7 @@ if [ -f /etc/doas.conf ]; then
 fi
 EOC
 
-# Function which can potentially be defined in config files to run at this stage
-if type post_mkrootfs &>/dev/null; then
-	post_mkrootfs
-fi
+opt_run_func post_mkrootfs
 
 chroot_exec /bin/sh <<EOC
 set -ex

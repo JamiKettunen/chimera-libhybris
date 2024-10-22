@@ -42,7 +42,7 @@ halium_version=12
 
 git clone https://github.com/JamiKettunen/cports -b hybris
 cd cports
-wget https://repo.chimera-linux.org/apk/apk-x86_64-3.0.0_pre6-r0.static -O apk
+wget https://repo.chimera-linux.org/apk/apk-$(uname -m)-3.0.0_pre10-r0.static -O apk
 chmod +x apk
 PATH=$PWD:$PATH
 ./cbuild keygen

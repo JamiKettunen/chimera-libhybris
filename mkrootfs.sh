@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 : "${ARCH:=aarch64}" # everything else untested
-: "${DATE:=20240707}" # https://repo.chimera-linux.org/live/
+: "${DATE:=20241027}" # https://repo.chimera-linux.org/live/
 : "${FLAVOR:=bootstrap}" # full
 : "${WORKDIR:=/tmp/chimera-rootfs}" # /mnt
 : "${OUT_ROOTFS:=/tmp/chimera-rootfs.img}"

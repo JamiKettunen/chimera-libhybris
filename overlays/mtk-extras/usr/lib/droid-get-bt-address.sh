@@ -5,7 +5,15 @@ WAITFORSERVICE_VALUE="Ready" waitforservice vendor.service.nvram_init
 
 # now wait for BT kernel module etc to be fully loaded to avoid hanging on
 # "Bluetooth binder service failed" on some devices (e.g. volla-yggdrasil)
-WAITFORSERVICE_VALUE="yes" waitforservice vendor.connsys.formeta.ready
+if [ -x /vendor/bin/wmt_launcher ]; then
+	# wmt_launcher is known to exist at least up to Helio G99 (MT6789)
+	WAITFORSERVICE_VALUE="yes" waitforservice vendor.connsys.formeta.ready
+else
+	# TODO: "waitforservice init.svc.wlan_assistant" on volla-algiz/nothing-tetris etc?
+	# -> modules loaded at the same time as this is set... also wait for "wlan_assistant" service?
+	#    -> perhaps look for new props again..
+	WAITFORSERVICE_VALUE="yes" waitforservice vendor.connsys.driver.ready
+fi
 
 # address already setup on a previous boot, nothing more to do here
 [ -f /var/lib/bluetooth/board-address ] && exit 0

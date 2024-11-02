@@ -48,9 +48,8 @@ PATH=$PWD:$PATH
 ./cbuild keygen
 ./cbuild binary-bootstrap
 pkgs="
-user/wayfire-droidian
+user/base-hybris
 user/halium-gsi-$halium_version.0${halium_arm32:+-arm32}
-main/nyagetty
 "
 for p in $pkgs; do ./cbuild pkg -a aarch64 ${p}; done
 ./cbuild prune-pkgs -a aarch64

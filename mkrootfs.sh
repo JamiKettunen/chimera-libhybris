@@ -38,12 +38,12 @@ if [ -z "${PKGS+x}" ]; then
 		"!base-full-fs" e2fsprogs # only ext4 images supported (for now), TODO: fstrim timer?!
 		"!base-full-kernel" kmod # external kernel+initramfs, still want support for loadable modules
 		"!base-full-locale" # meh
-		"!base-full-misc" chrony file less lscpu syslog-ng opendoas # lessen misc stuff
+		"!base-full-misc" chrony file less lscpu opendoas # lessen misc stuff
 		"!base-full-net-tools" iproute2 iputils rfkill # drop ethtool/traceroute/iw
 		"!base-full-net" openssh # drop dhcpcd/iwd (networkmanager used)
 		"!base-full-sound" # TODO: pulseaudio-modules-droid etc
 		bash rsync
-		upower networkmanager bluez
+		upower
 		libinput evtest
 		htop fastfetch neovim psmisc tree ncdu ripgrep
 		libgbinder-progs
@@ -206,10 +206,6 @@ else
   apk add chimera-repo-user
 fi
 apk upgrade -Ua
-
-# base-bootstrap - chimera-repo-main + dinit-chimera
-apk add -t .base-critical-hybris \
-  apk-tools chimerautils !base-cbuild dinit-chimera
 
 [ ${#PKGS[@]} -gt 0 ] && apk add ${PKGS[*]}
 

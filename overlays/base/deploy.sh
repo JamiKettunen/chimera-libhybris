@@ -1,8 +1,5 @@
 #!/bin/sh -ex
-apk add lxc-android@hybris-cports nyagetty@hybris-cports \
-    libhybris-test-progs@hybris-cports libegl-hybris@hybris-cports libgles2-hybris@hybris-cports libopencl-hybris@hybris-cports \
-    libgles1-hybris@hybris-cports \
-    bluebinder@hybris-cports
+apk add base-hybris@hybris-cports
 
 # we only care about tty1 (if even that) for conspy -> GUI launch; used to apk add !base-full-console dmesg
 [ -f /etc/default/console-setup ] && sed -i '' 's:ACTIVE_CONSOLES=.*:ACTIVE_CONSOLES="/dev/tty1":' /etc/default/console-setup

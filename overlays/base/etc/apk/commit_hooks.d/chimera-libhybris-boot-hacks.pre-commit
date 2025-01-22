@@ -24,17 +24,6 @@ if [ -f $cgroups ] && ! grep -q 'cgroups-v1.sh' $cgroups; then
 fi:' $cgroups
 fi
 
-# HACK: avoid failing boot with DINIT_EARLY_DEBUG set, https://github.com/chimera-linux/dinit-chimera/commit/9d919fc
-# expected default (end of log_debug function): [ -n "$DINIT_EARLY_DEBUG_SLOW" ] && sleep "$DINIT_EARLY_DEBUG_SLOW"
-common=/usr/lib/dinit.d/early/scripts/common.sh
-if [ -f $common ] && grep -q 'DINIT_EARLY_DEBUG_SLOW.*sleep' $common && ! grep -q '^    return 0$' $common && \
-   ! grep -q 'if \[ -n "$DINIT_EARLY_DEBUG_SLOW" ]' $common; then
-    echo "Hacking $common (early-cgroups) to not fail when booting with DINIT_EARLY_DEBUG set..."
-    sed -i '' '/\[ -n "$DINIT_EARLY_DEBUG_SLOW" ] && sleep "$DINIT_EARLY_DEBUG_SLOW"/a\
-    return 0
-' $common
-fi
-
 ## udev
 
 # HACK: avoid boot failure on some devices where "udevadm trigger --action=add" always(?) fails

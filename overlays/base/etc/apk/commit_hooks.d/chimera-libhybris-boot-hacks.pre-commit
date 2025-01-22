@@ -41,9 +41,9 @@ fi
 # vidofnir FIXME: Failed to write 'add' to '/sys/devices/platform/soc/11f00000.i2c/i2c-7/7-0066/power_supply/sc8551-standalone/uevent': Invalid argument
 # eos FIXME: Failed to write 'add' to '/sys/devices/platform/soc/soc:google,battery/power_supply/battery/uevent': Resource temporarily unavailable
 # expected default: trigger) exec /usr/bin/udevadm trigger --action=add ;;
-devd=/usr/libexec/dinit-devd
+devd=/usr/lib/dinit-devd
 if [ -f $devd ] && grep -q 'trigger.*exec' $devd; then
-    echo "Hacking $devd (early-udev-trigger) to not fail on 'udevadm trigger --action=add'..."
+    echo "Hacking $devd (early-dev-trigger) to not fail on 'udevadm trigger --action=add'..."
     sed -i '' 's!exec /usr/bin/udevadm trigger --action=add!/usr/bin/udevadm trigger --action=add; exit 0!' $devd
 fi
 

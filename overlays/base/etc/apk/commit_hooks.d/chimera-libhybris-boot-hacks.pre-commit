@@ -10,17 +10,14 @@ set -e
 # - cgroup2: unknown option "nsdelegate" -> mount without it (cheeseburger/dumpling v4.4?!)
 # - mount: /sys/fs/cgroup: unknown filesystem type 'cgroup2' -> fallback mount legacy v1 non-unified cgroup hierarchy (yggdrasil v4.4)
 # - maybe later patch older kernels since programs are also starting to deprecate support for cgroups v1...
-# expected default: ./early/helpers/mntpt "$CG_PATH" || mount -t cgroup2 -o nsdelegate cgroup2 "/sys/fs/cgroup"
+# expected default: /usr/lib/dinit.d/early/helpers/mnt try "$CG_PATH" cgroup2 cgroup2 nsdelegate
 cgroups=/usr/lib/dinit.d/early/scripts/cgroups.sh
 if [ -f $cgroups ] && ! grep -q 'cgroups-v1.sh' $cgroups; then
     echo "Hacking $cgroups (early-cgroups) to not fail on 'mount -o nsdelegate -t cgroup2 cgroup2 /sys/fs/cgroup'..."
-    #sed -i '' '/cgroup2/ s;$; || mount -t cgroup2 cgroup2 "/sys/fs/cgroup" || ./early/scripts/cgroups-v1.sh;' $cgroups
-    sed -i '' '/cgroup2/ s:.*:if ! ./early/helpers/mntpt "$CG_PATH"; then\
-    if grep -q cgroup2 /proc/filesystems; then\
-        mount -t cgroup2 -o nsdelegate cgroup2 "/sys/fs/cgroup" || mount -t cgroup2 cgroup2 "/sys/fs/cgroup"\
-    else\
-        ./early/scripts/cgroups-v1.sh\
-    fi\
+    sed -i '' '/cgroup2/ s:.*:if grep -q cgroup2 /proc/filesystems; then\
+    /usr/lib/dinit.d/early/helpers/mnt try "$CG_PATH" cgroup2 cgroup2 nsdelegate || /usr/lib/dinit.d/early/helpers/mnt try "$CG_PATH" cgroup2 cgroup2\
+else\
+    /usr/lib/dinit.d/early/scripts/cgroups-v1.sh\
 fi:' $cgroups
 fi
 
